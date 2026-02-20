@@ -38,6 +38,7 @@ public class RobotContainer {
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandJoystick m_driverController = new CommandJoystick(0);
+  // private final Joystick m_driverController = new Joystick(0);
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
   private final driveKay m_swerve = new driveKay();
 
@@ -60,6 +61,7 @@ public class RobotContainer {
     // Configure the trigger bindings
     m_swerve.configureAutoBuilder();
     configureBindings();
+
  
     PathfindingCommand.warmupCommand().schedule();
   }
@@ -77,10 +79,16 @@ public class RobotContainer {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     
      m_swerve.setDefaultCommand(m_swerve.driveCommand(
-       () -> -m_driverController.getRawAxis(1), 
-       ()-> -m_driverController.getRawAxis(0), 
+       () -> -m_driverController.getRawAxis(0), 
+       ()-> -m_driverController.getRawAxis(1), 
        ()->-m_driverController.getRawAxis(2)
      ));
+
+    //  m_swerve.setDefaultCommand(m_swerve.driveCommand(
+    //    () -> -m_driverController.getRawAxis(0), 
+    //    ()-> -m_driverController.getRawAxis(1), 
+    //    ()->-m_driverController.getRawAxis(4)
+    //  ));
 
 
     //  m_driverController.button(1).onTrue(Commands.runOnce(()->m_vision.lockIn()));
