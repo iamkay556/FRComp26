@@ -54,10 +54,13 @@ public class driveKay extends SubsystemBase {
                                                                       4),
                                                     Rotation2d.fromDegrees(180));
         try {
-            swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(maximumSpeed);
+            swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(maximumSpeed, startingPose);
         } catch (IOException e) {
             throw new RuntimeException("Runtime error when creating a new swerve drive:\n" + e);
         }
+
+
+
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
         swerveDrive.setModuleEncoderAutoSynchronize(true, 0.50);
         swerveDrive.setAutoCenteringModules(false);
@@ -67,7 +70,6 @@ public class driveKay extends SubsystemBase {
         //swerveDrive.getGyro().setOffset(new Rotation3d(0,0,Math.PI));
           
     }
-
     
     
     public void periodic() {  
@@ -118,6 +120,10 @@ public class driveKay extends SubsystemBase {
         mapvelo.get("backleft").getState(), 
         mapvelo.get("backright").getState());
   }
+
+  public ChassisSpeeds getRobotVelocity() {
+    return swerveDrive.getRobotVelocity();
+  }
   
 
   public void configureAutoBuilder(){
@@ -129,13 +135,12 @@ public class driveKay extends SubsystemBase {
       DriverStation.reportError("PathPlanner RobotConfig missing/invalid. AutoBuilder not configured.", e.getStackTrace());
       return;
     }
-    
 
     // Configure AutoBuilder last
     AutoBuilder.configure(
             this::getPose, // Robot pose supplier
             this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-            this::getChassisSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            this::getRobotVelocity, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE CHANGE TO GET CHASSIS SPEEDS IF NEEDED
             (speeds, feedforwards) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
                         new PPHolonomicDriveController( // PPHolonomicController is the built in path following controller for holonomic drive trains
                                 new PIDConstants(1, 0, 0), // Translation PID constants
