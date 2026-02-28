@@ -54,7 +54,7 @@ public class driveKay extends SubsystemBase {
                                                                       4),
                                                     Rotation2d.fromDegrees(180));
         try {
-            swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(maximumSpeed, startingPose);
+            swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(maximumSpeed);
         } catch (IOException e) {
             throw new RuntimeException("Runtime error when creating a new swerve drive:\n" + e);
         }
@@ -66,7 +66,7 @@ public class driveKay extends SubsystemBase {
         swerveDrive.setAutoCenteringModules(false);
         swerveDrive.zeroGyro();
 
-        SmartDashboard.putData("Field", field);
+        // SmartDashboard.putData("Field", field);
         //swerveDrive.getGyro().setOffset(new Rotation3d(0,0,Math.PI));
           
     }
@@ -100,7 +100,7 @@ public class driveKay extends SubsystemBase {
         modules.get("frontright").getPosition(),
         modules.get("backleft").getPosition(),
         modules.get("backright").getPosition()
-    };  
+    };
   }
 
   //   public ChassisSpeeds getChassisSpeeds(){
@@ -195,7 +195,7 @@ public class driveKay extends SubsystemBase {
                 ),0.8),
             MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.2) 
                 * swerveDrive.getMaximumChassisAngularVelocity(),
-            false,
+            true,
             false);
       });
     }
