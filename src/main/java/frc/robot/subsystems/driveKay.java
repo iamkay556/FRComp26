@@ -15,12 +15,17 @@ import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.StructPublisher;
+
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -34,10 +39,20 @@ import swervelib.math.SwerveMath;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+import frc.robot.LimelightHelpers.LimelightResults;
+import frc.robot.LimelightHelpers.PoseEstimate;
+
+
+
+
 public class driveKay extends SubsystemBase {
     private SwerveDrive swerveDrive;
     private NetworkTable table;
     private SwerveDrivePoseEstimator poseEstimator;
+    StructPublisher<Pose3d> pub1 = NetworkTableInstance.getDefault().getStructTopic("kayistehbestpub1", Pose3d.struct).publish();
+    StructPublisher<Pose3d> pub2 = NetworkTableInstance.getDefault().getStructTopic("kayistehbestpub2", Pose3d.struct).publish();
+    
+    StructPublisher<Pose3d> yagslPose = NetworkTableInstance.getDefault().getStructTopic("yagslPoseDylanSucks", Pose3d.struct).publish();
     private final Field2d field = new Field2d();
 
 
@@ -66,7 +81,6 @@ public class driveKay extends SubsystemBase {
         swerveDrive.setAutoCenteringModules(false);
         swerveDrive.zeroGyro();
 
-        // SmartDashboard.putData("Field", field);
         //swerveDrive.getGyro().setOffset(new Rotation3d(0,0,Math.PI));
           
     }
@@ -92,7 +106,26 @@ public class driveKay extends SubsystemBase {
   public Command zeroGyroCommand(){
       return Commands.runOnce( ()-> swerveDrive.zeroGyro());
   }
-  
+
+  public void driveRobotRelative(ChassisSpeeds speeds) {
+    swerveDrive.drive(speeds);
+  }
+
+  public void addVisionMeasurement(Pose2d visionPose, double timestampSec) {
+    swerveDrive.addVisionMeasurement(visionPose, timestampSec);
+  }
+
+  public void setVisionStdDevs(double xStd, double yStd, double thetaStd)
+  {
+    var stdDevs = new edu.wpi.first.math.Matrix<edu.wpi.first.math.numbers.N3, edu.wpi.first.math.numbers.N1>(
+        edu.wpi.first.math.Nat.N3(),
+        edu.wpi.first.math.Nat.N1(),
+        new double[] { xStd, yStd, thetaStd }
+    );
+    swerveDrive.setVisionMeasurementStdDevs(stdDevs);
+  }
+
+
   public SwerveModulePosition[] getModulePositions() {
     Map<String, swervelib.SwerveModule> modules = swerveDrive.getModuleMap();
     return new SwerveModulePosition[] {
@@ -178,10 +211,7 @@ public class driveKay extends SubsystemBase {
       );
     }
 
-    private void driveRobotRelative(ChassisSpeeds speeds) {
-     // TODO Auto-generated method stub
-     swerveDrive.drive(speeds);
-              }
+
 
     public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
       SmartDashboard.putString("X: ", "heehee" + MathUtil.applyDeadband(translationX.getAsDouble(), 0.2));
@@ -195,9 +225,12 @@ public class driveKay extends SubsystemBase {
                 ),0.8),
             MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.2) 
                 * swerveDrive.getMaximumChassisAngularVelocity(),
-            true,
+            false,
             false);
       });
     }
+
+
+
 }
 // hi

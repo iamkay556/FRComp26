@@ -5,8 +5,11 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import java.util.Set;
+
 
 import frc.robot.subsystems.driveKay;
+import frc.robot.subsystems.visionTest;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -24,6 +27,7 @@ import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstantsFactory;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
+import edu.wpi.first.wpilibj2.command.*;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -38,26 +42,15 @@ public class RobotContainer {
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandJoystick m_driverController = new CommandJoystick(0);
-  // private final Joystick m_driverController = new Joystick(0);
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
   private final driveKay m_swerve = new driveKay();
+  private final visionTest m_vision = new visionTest();
 
-  //private final ElevatorJustin m_elevator = new ElevatorJustin();
 
   
   
   public RobotContainer() {
-    // NamedCommands.registerCommand("elevateL1", m_elevator.elevate(1));
-    // NamedCommands.registerCommand("elevateL2", m_elevator.elevate(2));
-    // NamedCommands.registerCommand("elevateL3", m_elevator.elevate(3));
-    // NamedCommands.registerCommand("elevateL4", m_elevator.elevate(4));
-    // NamedCommands.registerCommand("elevateL0", m_elevator.elevate(1)); // reload
-
-    // NamedCommands.registerCommand("aimL1", m_shooter.aim(1)); 
-    // NamedCommands.registerCommand("aimL4", m_shooter.aim(2));
-    // NamedCommands.registerCommand("aimL0", m_shooter.aim(3)); // reload 
-    // NamedCommands.registerCommand("getBeamBreak",  m_shooter.beamBreak()); figure out what pathplanner needs for intake stopping later - or maybe it doesnt matter
-   
+    
     // Configure the trigger bindings
     m_swerve.configureAutoBuilder();
     configureBindings();
@@ -91,10 +84,10 @@ public class RobotContainer {
     //  ));
 
 
-    //  m_driverController.button(1).onTrue(Commands.runOnce(()->m_swerve.zeroGyroCommand()));
-    //  m_driverController.button(7).whileTrue(m_swerve.driveToPose(m_vision.findRightBranch()));
-    //  m_driverController.button(8).whileTrue(m_swerve.driveToPose(m_vision.findLeftBranch()));
+     m_driverController.button(7).whileTrue(m_swerve.driveToPose(m_vision.getTargetPose()));
+     //  m_driverController.button(8).whileTrue(m_swerve.driveToPose(m_vision.findLeftBranch()));
      m_driverController.button(3).onTrue(m_swerve.zeroGyroCommand());
+     m_driverController.button(8).onTrue(Commands.runOnce(() -> m_vision.lockIn()));
 
     
     
