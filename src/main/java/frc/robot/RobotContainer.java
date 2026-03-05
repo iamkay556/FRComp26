@@ -78,23 +78,29 @@ public class RobotContainer {
   private void configureBindings() {
     // Schedule `ExampleCommand` when `exampleCondition` changes to `true`
     
+    //  m_swerve.setDefaultCommand(m_swerve.driveCommand(
+      //  () -> -m_driverController.getRawAxis(0), 
+      //  ()-> -m_driverController.getRawAxis(1), 
+      //  ()->-m_driverController.getRawAxis(2)
+    //  ));
+
      m_swerve.setDefaultCommand(m_swerve.driveCommand(
-       () -> -m_driverController.getRawAxis(0), 
-       ()-> -m_driverController.getRawAxis(1), 
-       ()->-m_driverController.getRawAxis(2)
+       () -> -m_driverController.getRawAxis(1), 
+       ()-> -m_driverController.getRawAxis(0), 
+       ()-> -m_driverController.getRawAxis(2)
      ));
 
-    //  m_swerve.setDefaultCommand(m_swerve.driveCommand(
-    //    () -> -m_driverController.getRawAxis(0), 
-    //    ()-> -m_driverController.getRawAxis(1), 
-    //    ()->-m_driverController.getRawAxis(4)
+    //  m_swerve.setDefaultCommand(m_swerve.driveRobotRelative(
+    //    m_swerve.getChassisSpeeds()
     //  ));
+     
 
 
     //  m_driverController.button(1).onTrue(Commands.runOnce(()->m_swerve.zeroGyroCommand()));
     //  m_driverController.button(7).whileTrue(m_swerve.driveToPose(m_vision.findRightBranch()));
     //  m_driverController.button(8).whileTrue(m_swerve.driveToPose(m_vision.findLeftBranch()));
      m_driverController.button(3).onTrue(m_swerve.zeroGyroCommand());
+     //new Trigger(driverController::getAButton).whileTrue(driveRobotRelative);
 
     
     

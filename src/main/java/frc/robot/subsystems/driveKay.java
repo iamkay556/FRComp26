@@ -18,6 +18,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.NetworkTable;
@@ -34,6 +35,7 @@ import swervelib.math.SwerveMath;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+import edu.wpi.first.math.geometry.Rotation3d;
 public class driveKay extends SubsystemBase {
     private SwerveDrive swerveDrive;
     private NetworkTable table;
@@ -54,7 +56,7 @@ public class driveKay extends SubsystemBase {
                                                                       4),
                                                     Rotation2d.fromDegrees(180));
         try {
-            swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(maximumSpeed);
+            swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(maximumSpeed, startingPose);
         } catch (IOException e) {
             throw new RuntimeException("Runtime error when creating a new swerve drive:\n" + e);
         }
@@ -66,15 +68,14 @@ public class driveKay extends SubsystemBase {
         swerveDrive.setAutoCenteringModules(false);
         swerveDrive.zeroGyro();
 
-        // SmartDashboard.putData("Field", field);
-        //swerveDrive.getGyro().setOffset(new Rotation3d(0,0,Math.PI));
-          
+        SmartDashboard.putData("Field", field);
+         //swerveDrive.getGyro().setOffset(new Rotation3d(0,0,Math.PI));
     }
     
     
     public void periodic() {  
+      swerveDrive.updateOdometry();
       field.setRobotPose(getPose());
-
       SmartDashboard.putNumber("Pose X m", getPose().getX());
       SmartDashboard.putNumber("Pose Y m", getPose().getY());
       SmartDashboard.putNumber("Pose Rot deg", getPose().getRotation().getDegrees());
@@ -90,7 +91,10 @@ public class driveKay extends SubsystemBase {
   }
 
   public Command zeroGyroCommand(){
-      return Commands.runOnce( ()-> swerveDrive.zeroGyro());
+      return Commands.runOnce( ()-> {
+        swerveDrive.zeroGyro();
+        // swerveDrive.setGyroOffset(new Rotation3d(0, 0, -Math.PI/2.0));
+      });
   }
   
   public SwerveModulePosition[] getModulePositions() {
@@ -100,7 +104,7 @@ public class driveKay extends SubsystemBase {
         modules.get("frontright").getPosition(),
         modules.get("backleft").getPosition(),
         modules.get("backright").getPosition()
-    };
+    };  
   }
 
   //   public ChassisSpeeds getChassisSpeeds(){
@@ -190,12 +194,12 @@ public class driveKay extends SubsystemBase {
       return run(() -> {
         // Make the robot move
         swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-            MathUtil.applyDeadband(translationX.getAsDouble(), 0.2)* swerveDrive.getMaximumChassisVelocity(),
-            MathUtil.applyDeadband(translationY.getAsDouble(), 0.2) * swerveDrive.getMaximumChassisVelocity()
+            MathUtil.applyDeadband(translationX.getAsDouble(), 0.5)* swerveDrive.getMaximumChassisVelocity(),
+            MathUtil.applyDeadband(translationY.getAsDouble(), 0.5) * swerveDrive.getMaximumChassisVelocity()
                 ),0.8),
-            MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.2) 
+            MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.5) 
                 * swerveDrive.getMaximumChassisAngularVelocity(),
-            true,
+            false,
             false);
       });
     }
