@@ -9,7 +9,6 @@ import java.util.Set;
 
 
 import frc.robot.subsystems.driveKay;
-import frc.robot.subsystems.visionTest;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -29,6 +28,9 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.wpilibj2.command.*;
 
+
+import frc.robot.subsystems.TempVision;
+
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -44,7 +46,7 @@ public class RobotContainer {
   private final CommandJoystick m_driverController = new CommandJoystick(0);
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
   private final driveKay m_swerve = new driveKay();
-  private final visionTest m_vision = new visionTest();
+  private final TempVision m_vision = new TempVision();
 
 
   

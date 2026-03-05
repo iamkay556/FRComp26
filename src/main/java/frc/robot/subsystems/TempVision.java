@@ -13,7 +13,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 
 import java.util.Optional;
 
-public class visionTest extends SubsystemBase {
+public class TempVision extends SubsystemBase {
 
     private final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
@@ -33,7 +33,6 @@ public class visionTest extends SubsystemBase {
         }
     }
 
-    // -----------------------------------------------------------------------
     public Pose2d getTargetPose() {
 
         if (lockedTag == 0) {
