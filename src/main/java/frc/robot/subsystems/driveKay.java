@@ -214,16 +214,16 @@ public class driveKay extends SubsystemBase {
 
 
     public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier angularRotationX) {
-      SmartDashboard.putString("X: ", "heehee" + MathUtil.applyDeadband(translationX.getAsDouble(), 0.2));
-      SmartDashboard.putString("Y: ", "heehee" + MathUtil.applyDeadband(translationY.getAsDouble(), 0.2));
+      SmartDashboard.putString("X: ", "heehee" + MathUtil.applyDeadband(translationX.getAsDouble(), 0.5));
+      SmartDashboard.putString("Y: ", "heehee" + MathUtil.applyDeadband(translationY.getAsDouble(), 0.5));
       SmartDashboard.putString("Z: ","heehee" + Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.5), 3));
       return run(() -> {
         // Make the robot move
         swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-            MathUtil.applyDeadband(translationX.getAsDouble(), 0.2)* swerveDrive.getMaximumChassisVelocity(),
-            MathUtil.applyDeadband(translationY.getAsDouble(), 0.2) * swerveDrive.getMaximumChassisVelocity()
+            MathUtil.applyDeadband(translationX.getAsDouble(), 0.5)* swerveDrive.getMaximumChassisVelocity(),
+            MathUtil.applyDeadband(translationY.getAsDouble(), 0.5) * swerveDrive.getMaximumChassisVelocity()
                 ),0.8),
-            MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.2) 
+            MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.5) 
                 * swerveDrive.getMaximumChassisAngularVelocity(),
             false,
             false);
