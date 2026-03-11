@@ -9,7 +9,7 @@ import java.util.Set;
 
 
 import frc.robot.subsystems.driveKay;
-
+import frc.robot.subsystems.visionAndrew;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -46,7 +46,8 @@ public class RobotContainer {
   private final CommandJoystick m_driverController = new CommandJoystick(0);
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
   private final driveKay m_swerve = new driveKay();
-  private final TempVision m_vision = new TempVision();
+  // private final TempVision m_vision = new TempVision();
+  private final visionAndrew m_vision = new visionAndrew(m_swerve, "limelight");
 
 
   
@@ -88,13 +89,10 @@ public class RobotContainer {
 
      //  m_driverController.button(8).whileTrue(m_swerve.driveToPose(m_vision.findLeftBranch()));
      m_driverController.button(3).onTrue(m_swerve.zeroGyroCommand());
-     m_driverController.button(4).onTrue(Commands.runOnce(() -> m_vision.lockIn()));
+    //  m_driverController.button(4).onTrue(Commands.runOnce(() -> m_vision.lockIn()));
     //  m_driverController.button(5).whileTrue(m_swerve.driveToPose(m_vision.getTargetPose()));
-    m_driverController.button(5).whileTrue(
-      Commands.defer(() -> m_swerve.driveToPose(m_vision.getTargetPose()), Set.of(m_swerve))
-    );
-      
-    
+    // m_driverController.button(5).whileTrue(Commands.defer(() -> m_swerve.driveToPose(m_vision.getTargetPose()), Set.of(m_swerve)));
+     m_driverController.button(5).whileTrue(m_vision.alignFromVisibleTag()); 
   }
 
   /**
