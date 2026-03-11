@@ -89,9 +89,11 @@ public class RobotContainer {
      //  m_driverController.button(8).whileTrue(m_swerve.driveToPose(m_vision.findLeftBranch()));
      m_driverController.button(3).onTrue(m_swerve.zeroGyroCommand());
      m_driverController.button(4).onTrue(Commands.runOnce(() -> m_vision.lockIn()));
-     m_driverController.button(5).whileTrue(m_swerve.driveToPose(m_vision.getTargetPose()));
-
-    
+    //  m_driverController.button(5).whileTrue(m_swerve.driveToPose(m_vision.getTargetPose()));
+    m_driverController.button(5).whileTrue(
+      Commands.defer(() -> m_swerve.driveToPose(m_vision.getTargetPose()), Set.of(m_swerve))
+    );
+      
     
   }
 

@@ -3,6 +3,8 @@ package frc.robot.subsystems;
 import java.util.Optional;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.ser.impl.FailingSerializer;
+
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.MathUtil;
@@ -12,7 +14,12 @@ import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.networktables.BooleanPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.*;
@@ -25,8 +32,6 @@ public class visionAndrew extends SubsystemBase {
     private final AprilTagFieldLayout layout = AprilTagFieldLayout.loadField(AprilTagFields.k2026RebuiltAndymark);
 
     private static final double STANDOFF_DISTANCE = Units.feetToMeters(4.0);
-
-
     // reject
     private static final double MAX_SPIN_DEG_PER_SEC = 720;
     private static final double MAX_TAG_DISTANCE = 8.0;
@@ -48,6 +53,62 @@ public class visionAndrew extends SubsystemBase {
     private static final double ANG_TOL = Units.degreesToRadians(2);
 
     private double onTargetStart = -1;
+        // Robot pose as seen by odometry/vision fusion
+    private final StructPublisher<Pose2d> robotPosePub =
+            NetworkTableInstance.getDefault()
+                    .getStructTopic("AdvScope/RobotPose", Pose2d.struct).publish();
+
+    // The target pose we're driving to
+    private final StructPublisher<Pose2d> targetPosePub =
+            NetworkTableInstance.getDefault()
+                    .getStructTopic("AdvScope/TargetPose", Pose2d.struct).publish();
+
+    // The raw tag pose from the field layout
+    private final StructPublisher<Pose2d> tagPosePub =
+            NetworkTableInstance.getDefault()
+                    .getStructTopic("AdvScope/LockedTagPose", Pose2d.struct).publish();
+
+    // Vision-estimated pose from MegaTag2
+    private final StructPublisher<Pose2d> visionPosePub =
+            NetworkTableInstance.getDefault()
+                    .getStructTopic("AdvScope/VisionEstimate", Pose2d.struct).publish();
+
+    // PID error values
+    private final DoublePublisher xErrPub =
+            NetworkTableInstance.getDefault()
+                    .getDoubleTopic("AdvScope/PID/xError_m").publish();
+    private final DoublePublisher yErrPub =
+            NetworkTableInstance.getDefault()
+                    .getDoubleTopic("AdvScope/PID/yError_m").publish();
+    private final DoublePublisher thetaErrPub =
+            NetworkTableInstance.getDefault()
+                    .getDoubleTopic("AdvScope/PID/thetaError_deg").publish();
+
+    // Alignment status
+    private final BooleanPublisher alignActivePub =
+            NetworkTableInstance.getDefault()
+                    .getBooleanTopic("AdvScope/Alignment/active").publish();
+    private final BooleanPublisher onTargetPub =
+            NetworkTableInstance.getDefault()
+                    .getBooleanTopic("AdvScope/Alignment/onTarget").publish();
+
+    // Tag info
+    private final DoublePublisher tagIDPub =
+            NetworkTableInstance.getDefault()
+                    .getDoubleTopic("AdvScope/Vision/tagID").publish();
+    private final DoublePublisher tagDistPub =
+            NetworkTableInstance.getDefault()
+                    .getDoubleTopic("AdvScope/Vision/tagDist_m").publish();
+    private final DoublePublisher tagCountPub =
+            NetworkTableInstance.getDefault()
+                    .getDoubleTopic("AdvScope/Vision/tagCount").publish();
+
+    // Field2d for SmartDashboard (AdvantageScope can read this too)
+    private final Field2d field2d = new Field2d();
+
+    // Track current target for periodic publishing
+    private Pose2d currentTarget = null;
+    private boolean alignmentActive = false;
 
     public visionAndrew(driveKay drive, String limelightName) {
         this.drive = drive;
@@ -70,6 +131,7 @@ public class visionAndrew extends SubsystemBase {
         );
 
         fuseVision();
+        publishTelemetry();
     }
 
     // pose fusion
@@ -88,6 +150,44 @@ public class visionAndrew extends SubsystemBase {
         if (Math.abs(yawRate) > MAX_SPIN_DEG_PER_SEC) return;
 
         drive.addVisionMeasurement(mt2.pose, mt2.timestampSeconds);
+        // Publish vision estimate and tag info
+        visionPosePub.set(mt2.pose);
+        tagDistPub.set(mt2.avgTagDist);
+        tagCountPub.set(mt2.tagCount);
+    }
+    
+    private void publishTelemetry() {
+        Pose2d robotPose = drive.getPose();
+
+        // Robot pose
+        robotPosePub.set(robotPose);
+        field2d.setRobotPose(robotPose);
+
+        // Target pose (if active)
+        if (currentTarget != null) {
+            targetPosePub.set(currentTarget);
+            field2d.getObject("target").setPose(currentTarget);
+
+            // PID errors
+            xErrPub.set(currentTarget.getX() - robotPose.getX());
+            yErrPub.set(currentTarget.getY() - robotPose.getY());
+            thetaErrPub.set(Units.radiansToDegrees(
+                    currentTarget.getRotation().getRadians()
+                    - robotPose.getRotation().getRadians()));
+        }
+
+        // Current visible tag
+        int tagID = (int) LimelightHelpers.getFiducialID(limelightName);
+        tagIDPub.set(tagID);
+        if (tagID > 0) {
+            layout.getTagPose(tagID).ifPresent(p -> {
+                tagPosePub.set(p.toPose2d());
+                field2d.getObject("lockedTag").setPose(p.toPose2d());
+            });
+        }
+
+        alignActivePub.set(alignmentActive);
+        onTargetPub.set(isStable());
     }
 
     public Command alignFromVisibleTag() {
@@ -129,6 +229,8 @@ public class visionAndrew extends SubsystemBase {
 
         return Commands.runOnce(() -> {
             resetControllers(target);
+            currentTarget = target;
+            alignmentActive = true;
             onTargetStart = -1;
         }).andThen(
                 Commands.run(() -> {
@@ -158,8 +260,12 @@ public class visionAndrew extends SubsystemBase {
                     drive.driveRobotRelative(speeds);
 
                 }).until(this::isStable)
-        ).finallyDo(i ->
-                drive.driveRobotRelative(new ChassisSpeeds()));
+        ).finallyDo(i -> {
+                drive.driveRobotRelative(new ChassisSpeeds())
+                alignmentActive = false;
+                currentTarget = null;
+                });
+
     }
 
     private void resetControllers(Pose2d target) {
