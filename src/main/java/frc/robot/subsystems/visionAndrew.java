@@ -261,7 +261,7 @@ public class visionAndrew extends SubsystemBase {
 
                 }).until(this::isStable)
         ).finallyDo(i -> {
-                drive.driveRobotRelative(new ChassisSpeeds())
+                drive.driveRobotRelative(new ChassisSpeeds());
                 alignmentActive = false;
                 currentTarget = null;
                 });

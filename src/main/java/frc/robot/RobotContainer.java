@@ -76,7 +76,7 @@ public class RobotContainer {
     
      m_swerve.setDefaultCommand(m_swerve.driveCommand(
        () -> -m_driverController.getRawAxis(1), 
-       ()-> m_driverController.getRawAxis(0), 
+       ()-> -m_driverController.getRawAxis(0), 
        ()->-m_driverController.getRawAxis(2)
      ));
 
