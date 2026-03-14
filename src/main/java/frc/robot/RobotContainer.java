@@ -28,7 +28,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.wpilibj2.command.*;
 
-
+import frc.robot.subsystems.visionAlignment;
 import frc.robot.subsystems.TempVision;
 
 /**
@@ -92,7 +92,8 @@ public class RobotContainer {
     //  m_driverController.button(4).onTrue(Commands.runOnce(() -> m_vision.lockIn()));
     //  m_driverController.button(5).whileTrue(m_swerve.driveToPose(m_vision.getTargetPose()));
     // m_driverController.button(5).whileTrue(Commands.defer(() -> m_swerve.driveToPose(m_vision.getTargetPose()), Set.of(m_swerve)));
-     m_driverController.button(5).whileTrue(m_vision.alignFromVisibleTag()); 
+    //  m_driverController.button(5).whileTrue(m_vision.alignFromVisibleTag()); 
+    m_driverController.button(5).whileTrue(new visionAlignment(m_swerve)); 
   }
 
   /**

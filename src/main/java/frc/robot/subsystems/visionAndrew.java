@@ -196,7 +196,7 @@ public class visionAndrew extends SubsystemBase {
 
             int tagID = (int) LimelightHelpers.getFiducialID(limelightName);
 
-            if (tagID == 0) return Commands.none();
+            if (tagID < 1) return Commands.none();
 
             Optional<Pose2d> tagPoseOpt = layout.getTagPose(tagID).map(p -> p.toPose2d());
 
@@ -206,8 +206,8 @@ public class visionAndrew extends SubsystemBase {
 
             // for 4 meters
             Translation2d offset =
-                    new Translation2d(-STANDOFF_DISTANCE, 0);
-
+                    new Translation2d(STANDOFF_DISTANCE, 0);
+                
             Pose2d targetPose =
                     tagPose.transformBy(
                             new Transform2d(offset, new Rotation2d())
