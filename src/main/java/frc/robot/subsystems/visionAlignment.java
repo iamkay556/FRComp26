@@ -11,7 +11,7 @@ import frc.robot.LimelightHelpers;
 public class visionAlignment extends Command {
     private final driveKay drive;
     private final String limelightName = "limelight";
-    private static final double targetDistance = Units.feetToMeters(1.0);
+    private static final double targetDistance = Units.feetToMeters(4.0);
 
     private final PIDController forwardPID = new PIDController(1.5, 0.0, 0.0);
     private final PIDController strafePID  = new PIDController(1.8, 0.0, 0.0);
@@ -115,5 +115,12 @@ public void execute() {
         SmartDashboard.putNumber("VisionAlign/CmdOmega", omega);
         
     }
+}
+
+@Override
+public boolean isFinished() {
+    return forwardPID.atSetpoint()
+    && strafePID.atSetpoint()
+    && turnPID.atSetpoint();
 }
 }
