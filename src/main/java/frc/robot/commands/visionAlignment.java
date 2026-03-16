@@ -1,4 +1,4 @@
-package frc.robot.subsystems;
+package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
@@ -7,23 +7,24 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
+import frc.robot.subsystems.driveKay;
 
 public class visionAlignment extends Command {
     private final driveKay drive;
     private final String limelightName = "limelight";
     private static final double targetDistance = Units.feetToMeters(4.0);
 
-    private final PIDController forwardPID = new PIDController(1.5, 0.0, 0.0);
-    private final PIDController strafePID  = new PIDController(1.8, 0.0, 0.0);
-    private final PIDController turnPID    = new PIDController(0.03, 0.0, 0.001);
+    private final PIDController forwardPID = new PIDController(3.0, 0.0, 0.0);
+    private final PIDController strafePID  = new PIDController(3.0, 0.0, 0.0);
+    private final PIDController turnPID    = new PIDController(0.050, 0.0, 0.001);
 
     public visionAlignment(driveKay drive) {
         this.drive = drive;
         addRequirements(drive);
 
-        forwardPID.setTolerance(0.05);
-        strafePID.setTolerance(0.05);
-        turnPID.setTolerance(1.0);
+        forwardPID.setTolerance(0.1);
+        strafePID.setTolerance(0.1);
+        turnPID.setTolerance(5.0);
     }
 private int telemetryCounter = 0;
 private boolean lastHadTarget = false;
@@ -35,11 +36,10 @@ public void initialize() {
     turnPID.reset();
     telemetryCounter = 0;
     SmartDashboard.putString("VisionAlign/Status", "Initialized");
-}
+}   
 
 @Override
 public void execute() {
-    boolean hasTarget = LimelightHelpers.getTV(limelightName);
 
     boolean tv = LimelightHelpers.getTV("limelight");
     double[] tprs = LimelightHelpers.getTargetPose_RobotSpace("limelight");
@@ -64,7 +64,7 @@ public void execute() {
         SmartDashboard.putNumber("LL/BPTS_Z", bpts[2]);
     }
 
-    if (!hasTarget) {
+    if (!tv) {
         drive.driveRobotRelative(new ChassisSpeeds(0, 0, 0));
 
         if (lastHadTarget) {
@@ -93,9 +93,9 @@ public void execute() {
     double vy = strafePID.calculate(lateralErrorMeters, 0.0);
     double omega = turnPID.calculate(tx, 0.0);
 
-    vx = MathUtil.clamp(vx, -0.8, 0.8);
-    vy = MathUtil.clamp(vy, -0.8, 0.8);
-    omega = MathUtil.clamp(omega, -0.5, 0.5);
+    vx = MathUtil.clamp(vx, -2.0, 2.0);
+    vy = MathUtil.clamp(vy, -2.0, 2.0);
+    omega = MathUtil.clamp(omega, -1.5, 1.5);
 
     if (forwardPID.atSetpoint()) vx = 0.0;
     if (strafePID.atSetpoint()) vy = 0.0;
@@ -115,12 +115,27 @@ public void execute() {
         SmartDashboard.putNumber("VisionAlign/CmdOmega", omega);
         
     }
-}
+}   
 
 @Override
 public boolean isFinished() {
-    return forwardPID.atSetpoint()
-    && strafePID.atSetpoint()
-    && turnPID.atSetpoint();
+    if (!LimelightHelpers.getTV(limelightName)) return false;
+    
+    double[] robotPoseTargetSpace = LimelightHelpers.getTargetPose_RobotSpace(limelightName);
+    if (robotPoseTargetSpace == null || robotPoseTargetSpace.length < 6) return false;
+
+    double distanceError = Math.abs(robotPoseTargetSpace[2] - targetDistance);
+    double lateralError  = Math.abs(robotPoseTargetSpace[0]);
+    double turnError     = Math.abs(LimelightHelpers.getTX(limelightName));
+
+    return distanceError < 0.10
+        && lateralError  < 0.10
+        && turnError     < 5.0;
 }
+
+// public boolean isFinished() {
+//     return forwardPID.atSetpoint()
+//     && strafePID.atSetpoint()
+//     && turnPID.atSetpoint();
+// }
 }

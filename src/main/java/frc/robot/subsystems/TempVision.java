@@ -26,7 +26,7 @@
 
         public void lockIn() {
 
-            long tid = NetworkTableInstance.getDefault().getTable("limeli   ght").getEntry("tid").getInteger(0);
+            long tid = NetworkTableInstance.getDefault().getTable("limelight").getEntry("tid").getInteger(0);
 
             if (tid != 0) {
                 lockedTag = tid;

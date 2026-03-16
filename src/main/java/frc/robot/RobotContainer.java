@@ -5,6 +5,9 @@
 package frc.robot;
 
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.visionAlignment;
+import frc.robot.commands.appTag;
+
 import java.util.Set;
 
 
@@ -27,8 +30,6 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.wpilibj2.command.*;
-
-import frc.robot.subsystems.visionAlignment;
 import frc.robot.subsystems.TempVision;
 
 /**
@@ -48,9 +49,8 @@ public class RobotContainer {
   private final driveKay m_swerve = new driveKay();
   // private final TempVision m_vision = new TempVision();
   private final visionAndrew m_vision = new visionAndrew(m_swerve, "limelight");
-
-
-  
+  private final appTag m_approachReef = new appTag(m_swerve, "limelight", 0.5);
+  private final appTag m_approachClimber = new appTag(m_swerve, "limelight", 0.3);
   
   public RobotContainer() {
     
@@ -94,6 +94,8 @@ public class RobotContainer {
     // m_driverController.button(5).whileTrue(Commands.defer(() -> m_swerve.driveToPose(m_vision.getTargetPose()), Set.of(m_swerve)));
     //  m_driverController.button(5).whileTrue(m_vision.alignFromVisibleTag()); 
     m_driverController.button(5).whileTrue(new visionAlignment(m_swerve)); 
+    m_driverController.button(4).onTrue(m_approachReef);
+    m_driverController.button(6).onTrue(m_approachClimber);
   }
 
   /**
