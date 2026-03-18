@@ -26,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 
 import java.io.File;
+import java.rmi.dgc.VMID;
 import java.util.function.Supplier;
 
 import com.ctre.phoenix6.mechanisms.swerve.LegacySwerveModuleConstantsFactory;
@@ -46,17 +47,16 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
 
 
-  // Replace with CommandPS4Controller or CommandJoystick if needed
   private final CommandJoystick m_driverController = new CommandJoystick(0);
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
   private final driveKay m_swerve = new driveKay();
-  // private final TempVision m_vision = new TempVision();
   private final visionAndrew m_vision = new visionAndrew(m_swerve, "limelight");
   private final appTag m_approachReef = new appTag(m_swerve, "limelight", 0.5);
   private final appTag m_approachClimber = new appTag(m_swerve, "limelight", 0.3);
   private final intakeGsun m_intake = new intakeGsun();
   private final shooterRichard m_shooter = new shooterRichard();
   private final visionShooter m_visionShooter = new visionShooter();
+  private final visionAlignment m_VisionAlignment = new visionAlignment(m_swerve);
 
   
   public RobotContainer() {
@@ -100,12 +100,15 @@ public class RobotContainer {
     //  m_driverController.button(5).whileTrue(m_swerve.driveToPose(m_vision.getTargetPose()));
     // m_driverController.button(5).whileTrue(Commands.defer(() -> m_swerve.driveToPose(m_vision.getTargetPose()), Set.of(m_swerve)));
     //  m_driverController.button(5).whileTrue(m_vision.alignFromVisibleTag()); 
-    m_aimJoystick.button(1).whileTrue(new visionAlignment(m_swerve)); 
+    m_aimJoystick.button(1).whileTrue(m_VisionAlignment); 
     m_aimJoystick.button(2).onTrue(m_approachReef);
     m_aimJoystick.button(3).onTrue(m_approachClimber);
     m_aimJoystick.button(4).toggleOnTrue(m_intake.runIntake());
     m_aimJoystick.button(5).toggleOnTrue(m_shooter.runShooter());
     m_aimJoystick.button(6).toggleOnTrue(m_visionShooter.runShooter());
+    
+    m_aimJoystick.button(7).whileTrue(m_intake.holdPosition1());
+    m_aimJoystick.button(8).whileTrue(m_intake.holdPosition2());
   }
 
   /**
