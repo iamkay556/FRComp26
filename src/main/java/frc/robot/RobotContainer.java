@@ -13,8 +13,8 @@ import java.util.Set;
 
 import frc.robot.subsystems.driveKay;
 import frc.robot.subsystems.visionAndrew;
-import frc.robot.subsystems.intake;
-import frc.robot.subsystems.shooter;
+import frc.robot.subsystems.intakeGsun;
+import frc.robot.subsystems.shooterRichard;
 import frc.robot.subsystems.visionShooter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.wpilibj.Filesystem;
@@ -54,8 +54,8 @@ public class RobotContainer {
   private final visionAndrew m_vision = new visionAndrew(m_swerve, "limelight");
   private final appTag m_approachReef = new appTag(m_swerve, "limelight", 0.5);
   private final appTag m_approachClimber = new appTag(m_swerve, "limelight", 0.3);
-  private final intake m_intake = new intake();
-  private final shooter m_shooter = new shooter();
+  private final intakeGsun m_intake = new intakeGsun();
+  private final shooterRichard m_shooter = new shooterRichard();
   private final visionShooter m_visionShooter = new visionShooter();
 
   
@@ -100,12 +100,12 @@ public class RobotContainer {
     //  m_driverController.button(5).whileTrue(m_swerve.driveToPose(m_vision.getTargetPose()));
     // m_driverController.button(5).whileTrue(Commands.defer(() -> m_swerve.driveToPose(m_vision.getTargetPose()), Set.of(m_swerve)));
     //  m_driverController.button(5).whileTrue(m_vision.alignFromVisibleTag()); 
-    m_driverController.button(5).whileTrue(new visionAlignment(m_swerve)); 
-    m_driverController.button(4).onTrue(m_approachReef);
-    m_driverController.button(6).onTrue(m_approachClimber);
-    m_driverController.button(7).toggleOnTrue(m_intake.runIntake());
-    m_driverController.button(8).toggleOnTrue(m_shooter.runShooter());
-    m_driverController.button(9).toggleOnTrue(m_visionShooter.runShooter());
+    m_aimJoystick.button(1).whileTrue(new visionAlignment(m_swerve)); 
+    m_aimJoystick.button(2).onTrue(m_approachReef);
+    m_aimJoystick.button(3).onTrue(m_approachClimber);
+    m_aimJoystick.button(4).toggleOnTrue(m_intake.runIntake());
+    m_aimJoystick.button(5).toggleOnTrue(m_shooter.runShooter());
+    m_aimJoystick.button(6).toggleOnTrue(m_visionShooter.runShooter());
   }
 
   /**

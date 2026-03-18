@@ -15,10 +15,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 
-public class shooter extends SubsystemBase {
+public class shooterRichard extends SubsystemBase {
     private TalonFX shooter;
 
-    public shooter() {
+    public shooterRichard() {
         this.shooter = new TalonFX(0);
     }
     

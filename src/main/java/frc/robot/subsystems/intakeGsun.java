@@ -15,10 +15,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 
-public class intake extends SubsystemBase {
+public class intakeGsun extends SubsystemBase {
     private TalonFX intake;
 
-    public intake() {
+    public intakeGsun() {
         this.intake = new TalonFX(0);
     }
     
