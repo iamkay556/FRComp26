@@ -225,7 +225,7 @@ public class driveKay extends SubsystemBase {
                 ),0.8),
             MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.5) 
                 * swerveDrive.getMaximumChassisAngularVelocity(),
-            false,
+            true,
             false);
       });
     }

@@ -16,21 +16,31 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 public class shooterRichard extends SubsystemBase {
-    private TalonFX shooter;
+    private TalonFX shooter1;
+    private TalonFX shooter2;
+    private TalonFX inmotor;
 
     public shooterRichard() {
-        this.shooter = new TalonFX(0);
+        this.shooter1 = new TalonFX(0);
+        this.shooter2 = new TalonFX(0);
+        this.inmotor = new TalonFX(0);
     }
     
     final DutyCycleOut shooterPower = new DutyCycleOut(0.0);
+    final DutyCycleOut intakePower = new DutyCycleOut(0.0);
+
     public void periodic() {}
 
     public void shooterStart() {
-        shooter.setControl(shooterPower.withOutput(1.0));
+        shooter1.setControl(shooterPower.withOutput(1.0));
+        shooter2.setControl(shooterPower.withOutput(1.0));
+        inmotor.setControl(intakePower.withOutput(-0.8));
     }
 
      public void shooterStop() {
-        shooter.setControl(shooterPower.withOutput(0.0));
+        shooter1.setControl(shooterPower.withOutput(0.0));
+        shooter2.setControl(shooterPower.withOutput(0.0));
+        inmotor.setControl(intakePower.withOutput(0.0));
     }
 
     public Command runShooter() {
