@@ -12,7 +12,7 @@ import java.util.Set;
 
 
 import frc.robot.subsystems.driveKay;
-import frc.robot.subsystems.visionAndrew;
+import frc.robot.subsystems.VisionPID;
 import frc.robot.subsystems.intakeGsun;
 import frc.robot.subsystems.shooterRichard;
 import frc.robot.subsystems.visionShooter;
@@ -50,7 +50,7 @@ public class RobotContainer {
   private final CommandJoystick m_driverController = new CommandJoystick(0);
   private final CommandJoystick m_aimJoystick = new CommandJoystick(1);
   private final driveKay m_swerve = new driveKay();
-  private final visionAndrew m_vision = new visionAndrew(m_swerve, "limelight");
+  private final VisionPID m_vision = new VisionPID(m_swerve, "limelight");
   private final appTag m_approachReef = new appTag(m_swerve, "limelight", 0.5);
   private final appTag m_approachClimber = new appTag(m_swerve, "limelight", 0.3);
   private final intakeGsun m_intake = new intakeGsun();

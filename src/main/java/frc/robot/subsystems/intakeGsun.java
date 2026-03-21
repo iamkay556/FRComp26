@@ -69,8 +69,8 @@ public class intakeGsun extends SubsystemBase {
     final MotionMagicVoltage positionRequest = new MotionMagicVoltage(0).withSlot(0);
 
     public intakeGsun() {
-        this.intakeBall = new TalonFX(18);
-        this.intakeShaft = new TalonFX(19); // CHANGE DEVICE ID TO WTVR WE SET
+        this.intakeBall = new TalonFX(19);
+        this.intakeShaft = new TalonFX(23); // CHANGE DEVICE ID TO WTVR WE SET
         configureMotor();
     }
 

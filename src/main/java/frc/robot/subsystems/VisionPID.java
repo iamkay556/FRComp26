@@ -24,7 +24,7 @@ import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.*;
 
-public class visionAndrew extends SubsystemBase {
+public class VisionPID extends SubsystemBase {
 
     private final driveKay drive;
     private final String limelightName;
@@ -110,7 +110,7 @@ public class visionAndrew extends SubsystemBase {
     private Pose2d currentTarget = null;
     private boolean alignmentActive = false;
 
-    public visionAndrew(driveKay drive, String limelightName) {
+    public VisionPID(driveKay drive, String limelightName) {
         this.drive = drive;
         this.limelightName = limelightName;
 
