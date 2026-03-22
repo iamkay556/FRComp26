@@ -8,8 +8,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class AdjustAngle extends SubsystemBase {
 
-    private final TalonFX motor = new TalonFX(0); // CHANGE CAN ID
-    
+    private final TalonFX motor = new TalonFX(27); // CHANGE CAN ID
+
     private final DutyCycleOut power = new DutyCycleOut(0.0);
 
     private static final double ADJUST_SPEED = 0.1;

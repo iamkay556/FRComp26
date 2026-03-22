@@ -21,9 +21,9 @@ public class shooterRichard extends SubsystemBase {
     private TalonFX inmotor;
 
     public shooterRichard() {
-        this.shooter1 = new TalonFX(0);
-        this.shooter2 = new TalonFX(0);
-        this.inmotor = new TalonFX(0);
+        this.shooter1 = new TalonFX(22);
+        this.shooter2 = new TalonFX(25);
+        this.inmotor = new TalonFX(24);
     }
     
     final DutyCycleOut shooterPower = new DutyCycleOut(0.0);
@@ -32,9 +32,9 @@ public class shooterRichard extends SubsystemBase {
     public void periodic() {}
 
     public void shooterStart() {
-        shooter1.setControl(shooterPower.withOutput(1.0));
-        shooter2.setControl(shooterPower.withOutput(1.0));
-        inmotor.setControl(intakePower.withOutput(-0.8));
+        shooter1.setControl(shooterPower.withOutput(.5));
+        shooter2.setControl(shooterPower.withOutput(.50));
+        inmotor.setControl(intakePower.withOutput(-0.4));
     }
 
      public void shooterStop() {

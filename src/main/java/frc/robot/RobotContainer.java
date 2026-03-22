@@ -7,8 +7,6 @@ package frc.robot;
 import frc.robot.commands.visionAlignment;
 import frc.robot.commands.appTag;
 
-import java.util.Set;
-
 import frc.robot.subsystems.driveKay;
 import frc.robot.subsystems.VisionPID;
 import frc.robot.subsystems.intakeGsun;
@@ -17,23 +15,21 @@ import frc.robot.subsystems.visionShooter;
 import frc.robot.subsystems.climberAndrew;
 
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.button.CommandJoystick;
 
-import java.io.File;
-import java.util.function.Supplier;
-
-import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
-import edu.wpi.first.wpilibj2.command.*;
 
 public class RobotContainer {
+
+  // ─── TUNE THIS ────────────────────────────────────────────────────────────
+  // How many seconds to run the shooter before starting the climb.
+  // Increase if the ball isn't fully launched. Decrease if it's wasting time.
+  private static final double SHOOT_DURATION_SECONDS = 2.0;
+  // ─────────────────────────────────────────────────────────────────────────
 
   // ─── SUBSYSTEMS ───────────────────────────────────────────────────────────
   private final CommandJoystick m_driverController = new CommandJoystick(0);
@@ -59,32 +55,43 @@ public class RobotContainer {
 
     // ─── DRIVE CONTROLLER ─────────────────────────────────────────────────
     m_swerve.setDefaultCommand(m_swerve.driveCommand(
-        () -> m_driverController.getRawAxis(1),
-        () -> m_driverController.getRawAxis(0),
+        () -> -m_driverController.getRawAxis(1),
+        () -> -m_driverController.getRawAxis(0),
         () -> -m_driverController.getRawAxis(2)
     ));
 
     m_driverController.button(3).onTrue(m_swerve.zeroGyroCommand());
+    m_driverController.button(4).onTrue(m_intake.runTempKrak());
+    m_driverController.button(5).whileTrue(m_shooter.runShooter());
 
     // ─── AIM JOYSTICK ─────────────────────────────────────────────────────
-    m_aimJoystick.button(1).whileTrue(m_VisionAlignment);           // Vision align
-    m_aimJoystick.button(2).onTrue(m_approachReef);                 // Approach reef tag
-    m_aimJoystick.button(3).onTrue(m_approachClimber);              // Approach climber tag
+    m_aimJoystick.button(1).whileTrue(m_VisionAlignment);
+    m_aimJoystick.button(2).onTrue(m_approachReef);
+    m_aimJoystick.button(3).onTrue(m_approachClimber);
 
-    m_aimJoystick.button(4).toggleOnTrue(m_intake.runIntake());     // Run intake rollers
-    m_aimJoystick.button(5).toggleOnTrue(m_shooter.runShooter());   // Run shooter
-    m_aimJoystick.button(6).toggleOnTrue(m_visionShooter.runShooter()); // Vision shooter
+    m_aimJoystick.button(4).toggleOnTrue(m_intake.runIntake());
+    m_aimJoystick.button(5).toggleOnTrue(m_shooter.runShooter());
+    m_aimJoystick.button(6).toggleOnTrue(m_visionShooter.runShooter());
 
-    m_aimJoystick.button(7).whileTrue(m_intake.holdPosition1());    // Intake position 1
-    m_aimJoystick.button(8).whileTrue(m_intake.holdPosition2());    // Intake position 2
+    m_aimJoystick.button(7).whileTrue(m_intake.holdPosition1());
+    m_aimJoystick.button(8).whileTrue(m_intake.holdPosition2());
 
     // ─── CLIMBER ──────────────────────────────────────────────────────────
-    m_aimJoystick.button(9).whileTrue(m_climber.cmdLowerClimber()); // Lower arm manually
-    m_aimJoystick.button(10).whileTrue(m_climber.cmdPullUp());      // Pull up manually
-    m_aimJoystick.button(11).onTrue(m_climber.fullClimb(m_swerve)); // Full auto climb sequence
+    m_aimJoystick.button(9).whileTrue(m_climber.cmdLowerClimber());
+    m_aimJoystick.button(10).whileTrue(m_climber.cmdPullUp());
+    m_aimJoystick.button(11).onTrue(m_climber.fullClimb(m_swerve));
   }
 
+  // ─── AUTO: SHOOT THEN CLIMB ───────────────────────────────────────────────
+  // Step 1 — Run shooter for SHOOT_DURATION_SECONDS, then stop it
+  // Step 2 — Run full climb sequence (lower arm → drive back → pull up)
   public Command getAutonomousCommand() {
-    return new PathPlannerAuto("ballin");
+    return new PathPlannerAuto(""); 
   }
+  // public Command getAutonomousCommand() {
+  //   return m_shooter.runShooter()
+  //       .withTimeout(SHOOT_DURATION_SECONDS)
+  //       .andThen(Commands.runOnce(m_shooter::shooterStop, m_shooter))
+  //       .andThen(m_climber.fullClimb(m_swerve));
+  // }
 }
