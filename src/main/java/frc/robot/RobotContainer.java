@@ -61,25 +61,26 @@ public class RobotContainer {
     ));
 
     m_driverController.button(3).onTrue(m_swerve.zeroGyroCommand());
-    m_driverController.button(4).onTrue(m_intake.runTempKrak());
+    m_driverController.button(4).whileTrue(m_intake.runTempKrak());
     m_driverController.button(5).whileTrue(m_shooter.runShooter());
 
-    // ─── AIM JOYSTICK ─────────────────────────────────────────────────────
-    m_aimJoystick.button(1).whileTrue(m_VisionAlignment);
-    m_aimJoystick.button(2).onTrue(m_approachReef);
-    m_aimJoystick.button(3).onTrue(m_approachClimber);
+    // // ─── AIM JOYSTICK ─────────────────────────────────────────────────────
+    // m_aimJoystick.button(1).whileTrue(m_VisionAlignment);
+    // m_aimJoystick.button(2).onTrue(m_approachReef);
+    // m_aimJoystick.button(3).onTrue(m_approachClimber);
 
-    m_aimJoystick.button(4).toggleOnTrue(m_intake.runIntake());
-    m_aimJoystick.button(5).toggleOnTrue(m_shooter.runShooter());
-    m_aimJoystick.button(6).toggleOnTrue(m_visionShooter.runShooter());
+    // m_aimJoystick.button(4).toggleOnTrue(m_intake.runIntake());
+    // m_aimJoystick.button(5).toggleOnTrue(m_shooter.runShooter());
+    // m_aimJoystick.button(6).toggleOnTrue(m_visionShooter.runShooter());
 
-    m_aimJoystick.button(7).whileTrue(m_intake.holdPosition1());
-    m_aimJoystick.button(8).whileTrue(m_intake.holdPosition2());
+    // // m_aimJoystick.button(7).whileTrue(m_intake.holdPosition1());
+    // m_aimJoystick.button(8).whileTrue(m_intake.holdPosition2());
+    // m_aimJoystick.button(7).whileTrue(m_intake.runTempKrak());
 
-    // ─── CLIMBER ──────────────────────────────────────────────────────────
-    m_aimJoystick.button(9).whileTrue(m_climber.cmdLowerClimber());
-    m_aimJoystick.button(10).whileTrue(m_climber.cmdPullUp());
-    m_aimJoystick.button(11).onTrue(m_climber.fullClimb(m_swerve));
+    // // ─── CLIMBER ──────────────────────────────────────────────────────────
+    // m_aimJoystick.button(9).whileTrue(m_climber.cmdLowerClimber());
+    // m_aimJoystick.button(10).whileTrue(m_climber.cmdPullUp());
+    // m_aimJoystick.button(11).onTrue(m_climber.fullClimb(m_swerve));
   }
 
   // ─── AUTO: SHOOT THEN CLIMB ───────────────────────────────────────────────

@@ -139,7 +139,7 @@ public class intakeGsun extends SubsystemBase {
 
     public Command runTempKrak(){ {
         return Commands.startEnd(
-            () -> intakeShaft.setControl(intakePower.withOutput(1.0)), 
+            () -> intakeShaft.setControl(intakePower.withOutput(-0.5)), 
             () -> intakeShaft.setControl(intakePower.withOutput(0)),
             this
         );
