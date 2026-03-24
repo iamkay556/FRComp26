@@ -63,6 +63,9 @@ public class RobotContainer {
     m_driverController.button(3).onTrue(m_swerve.zeroGyroCommand());
     m_driverController.button(4).whileTrue(m_intake.runTempKrak());
     m_driverController.button(5).whileTrue(m_shooter.runShooter());
+    m_driverController.button(7).whileTrue(m_intake.holdPosition1());
+    m_driverController.button(8).whileTrue(m_intake.holdPosition2());
+    m_driverController.button(9).whileTrue(m_intake.runIntake());
 
     // // ─── AIM JOYSTICK ─────────────────────────────────────────────────────
     // m_aimJoystick.button(1).whileTrue(m_VisionAlignment);
