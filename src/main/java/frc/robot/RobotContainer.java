@@ -81,7 +81,8 @@ public class RobotContainer {
     m_driverController.button(7).whileTrue(m_intake.holdPosition1());
     m_driverController.button(8).whileTrue(m_intake.holdPosition2());
     m_driverController.button(9).whileTrue(m_intake.runIntake());
-    m_driverController.button(10).whileTrue(m_VisionAlignment);
+    // m_driverController.button(10).whileTrue(m_VisionAlignment);
+     m_driverController.button(10).whileTrue(new visionAlignment(m_swerve)); 
     m_driverController.button(11).whileTrue(m_approachReef);
 
     

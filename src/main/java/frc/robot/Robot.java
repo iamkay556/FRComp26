@@ -31,13 +31,23 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer();
 
-     LimelightHelpers.setCameraPose_RobotSpace(
+  //    LimelightHelpers.setCameraPose_RobotSpace(
+  //     "limelight",
+  //     -0.1,  // forward meters
+  //     -0.3317875,   // side meters
+  //     0.60,  // up meters
+  //     0.0,   // roll degrees
+  //     30.0,  // pitch degrees
+  //     0.0    // yaw degrees
+  // );
+
+    LimelightHelpers.setCameraPose_RobotSpace(
       "limelight",
-      -0.1,  // forward meters
-      -0.3317875,   // side meters
-      0.60,  // up meters
+      0,  // forward meters
+      0.0,   // side meters
+      0.40,  // up meters
       0.0,   // roll degrees
-      30.0,  // pitch degrees
+      0.0,  // pitch degrees
       0.0    // yaw degrees
   );
    SmartDashboard.putData("Autonomous Options", m_chooser);
