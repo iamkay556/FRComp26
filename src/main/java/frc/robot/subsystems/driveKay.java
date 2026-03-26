@@ -220,10 +220,10 @@ public class driveKay extends SubsystemBase {
       return run(() -> {
         // Make the robot move
         swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
-            Math.pow(MathUtil.applyDeadband(translationX.getAsDouble(), 0.3), 2)* swerveDrive.getMaximumChassisVelocity(),
-            Math.pow(MathUtil.applyDeadband(translationY.getAsDouble(), 0.3), 2) * swerveDrive.getMaximumChassisVelocity()
-                ),0.8),
-            Math.pow(MathUtil.applyDeadband(angularRotationX.getAsDouble(), 0.3), 3)
+            MathUtil.applyDeadband(translationX.getAsDouble(), 0.2) * swerveDrive.getMaximumChassisVelocity(),
+            MathUtil.applyDeadband(translationY.getAsDouble(), 0.2) * swerveDrive.getMaximumChassisVelocity()
+                ),0.6),
+            MathUtil.applyDeadband(angularRotationX.getAsDouble() * 0.6, 0.2) 
                 * swerveDrive.getMaximumChassisAngularVelocity(),
             false,
             false);

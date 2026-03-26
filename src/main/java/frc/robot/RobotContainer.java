@@ -34,9 +34,9 @@ public class RobotContainer {
   // ─────────────────────────────────────────────────────────────────────────
 
   // ─── SUBSYSTEMS ───────────────────────────────────────────────────────────
-  // private final CommandJoystick m_driverController = new CommandJoystick(0);
+  private final CommandJoystick m_driverController = new CommandJoystick(0);
   private final CommandJoystick m_aimJoystick      = new CommandJoystick(1);
-  private final XboxController m_Controller = new XboxController(0);
+  // private final XboxController m_Controller = new XboxController(0);
 
   private final driveKay        m_swerve           = new driveKay();
   private final VisionPID       m_vision           = new VisionPID(m_swerve, "limelight");
@@ -57,39 +57,48 @@ public class RobotContainer {
   private void configureBindings() {
 
     // ─── DRIVE CONTROLLER ─────────────────────────────────────────────────
-    // m_swerve.setDefaultCommand(m_swerve.driveCommand(
-    //     () -> -m_driverController.getRawAxis(1),
-    //     () -> -m_driverController.getRawAxis(0),
-    //     () -> m_driverController.getRawAxis(2)
-    // ));
+    m_swerve.setDefaultCommand(m_swerve.driveCommand(
+        () -> -m_driverController.getRawAxis(1),
+        () -> -m_driverController.getRawAxis(0),
+        () -> m_driverController.getRawAxis(2)
+    ));
 
     // default swerve drive using normal XboxController axes
-    m_swerve.setDefaultCommand(
-        m_swerve.driveCommand(
-            () -> -m_Controller.getLeftY(),   // forward/back
-            () -> -m_Controller.getLeftX(),   // strafe
-            () -> m_Controller.getRightX()   // rotate
-        )
-    );
+    // m_swerve.setDefaultCommand(
+    //     m_swerve.driveCommand(
+    //         () -> -m_Controller.getLeftY(),   // forward/back
+    //         () -> -m_Controller.getLeftX(),   // strafe
+    //         () -> m_Controller.getRightX()   // rotate
+    //     )
+    // );
 
+    
 
-
-    // m_driverController.button(3).onTrue(m_swerve.zeroGyroCommand());
-    // m_driverController.button(4).whileTrue(m_intake.runTempKrak());
+    m_driverController.button(3).onTrue(m_swerve.zeroGyroCommand());
+    m_driverController.button(4).whileTrue(m_intake.runTempKrak());
+    m_driverController.button(5).whileTrue(m_intake.runTempKrakBackwards());
     // m_driverController.button(5).whileTrue(m_shooter.runShooter());
-    // m_driverController.button(7).whileTrue(m_intake.holdPosition1());
-    // m_driverController.button(8).whileTrue(m_intake.holdPosition2());
-    // m_driverController.button(9).whileTrue(m_intake.runIntake());
+    m_driverController.button(7).whileTrue(m_intake.holdPosition1());
+    m_driverController.button(8).whileTrue(m_intake.holdPosition2());
+    m_driverController.button(9).whileTrue(m_intake.runIntake());
+    m_driverController.button(10).whileTrue(m_VisionAlignment);
+    m_driverController.button(11).whileTrue(m_approachReef);
+
+    
 
 
-    // HOLD WHILE PRESSED
-  if (m_Controller.getYButton()) {
-      m_intake.runTempKrak().schedule();
-  }
+      // HOLD WHILE PRESSED
+    // if (m_Controller.getYButton()) {
+        // m_intake.runTempKrak().schedule();
+    // }
+      
+    // if (m_Controller.getAButton()) {
+    //     m_intake.runIntake();
+    // }
 
-  if (m_Controller.getLeftBumper()) {
-      m_shooter.runShooter().schedule();
-  }
+    // if (m_Controller.getLeftBumper()) {
+    //     m_shooter.runShooter().schedule();
+    // }
 
     // // ─── AIM JOYSTICK ─────────────────────────────────────────────────────
     // m_aimJoystick.button(1).whileTrue(m_VisionAlignment);

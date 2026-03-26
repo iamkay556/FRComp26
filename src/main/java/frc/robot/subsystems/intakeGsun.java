@@ -22,11 +22,11 @@ public class intakeGsun extends SubsystemBase {
 
     // ─── POSITIONS ────────────────────────────────────────────────────────────
     // Position 1: confirmed correct angle from Phoenix Tuner X self-test
-    private static final double HOLD_POSITION_ROTATIONS1 = 0.4512;
+    private static final double HOLD_POSITION_ROTATIONS1 = 0.16;
 
     // Position 2: tune this — move to desired angle, read "intakeShaft/Position"
     // from Shuffleboard, paste here
-    private static final double HOLD_POSITION_ROTATIONS2 = -3; // TUNE THIS
+    private static final double HOLD_POSITION_ROTATIONS2 = 6.8; // TUNE THIS
 
     // 120 degrees in rotor rotations (120 / 360 = 0.333 rotations).
     // If your mechanism has a gear ratio, multiply: e.g. 0.333 * gearRatio
@@ -39,16 +39,16 @@ public class intakeGsun extends SubsystemBase {
     private static final double NUDGE_TIMEOUT_SECONDS = 0.5; // TUNE THIS
 
     // ─── PID + MOTION MAGIC ───────────────────────────────────────────────────
-    private static final double kP = 1.5;
+    private static final double kP = 10.0;
     private static final double kI = 0.0;
     private static final double kD = 0.0;
     private static final double kV = 0.12;
     private static final double kA = 0.0;
-    private static final double kS = 0.1;
+    private static final double kS = 0.2;
 
-    private static final double MM_CRUISE_VELOCITY = 20.0;
-    private static final double MM_ACCELERATION    = 20.0;
-    private static final double MM_JERK            = 5.0;
+    private static final double MM_CRUISE_VELOCITY = 50.0;
+    private static final double MM_ACCELERATION    = 80.0;
+    private static final double MM_JERK            = 40.0;
     // ─────────────────────────────────────────────────────────────────────────
 
     private TalonFX intakeBall;
@@ -142,7 +142,15 @@ public class intakeGsun extends SubsystemBase {
 
     public Command runTempKrak(){ {
         return Commands.startEnd(
-            () -> intakeShaft.setControl(intakePower.withOutput(-0.5)), 
+            () -> intakeShaft.setControl(intakePower.withOutput(-0.2)), 
+            () -> intakeShaft.setControl(intakePower.withOutput(0)),
+            this
+        );
+    }}
+
+     public Command runTempKrakBackwards(){ {
+        return Commands.startEnd(
+            () -> intakeShaft.setControl(intakePower.withOutput(0.2)), 
             () -> intakeShaft.setControl(intakePower.withOutput(0)),
             this
         );

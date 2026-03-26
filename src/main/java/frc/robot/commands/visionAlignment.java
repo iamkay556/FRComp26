@@ -12,10 +12,10 @@ import frc.robot.subsystems.driveKay;
 public class visionAlignment extends Command {
     private final driveKay drive;
     private final String limelightName = "limelight";
-    private static final double targetDistance = Units.feetToMeters(4.0);
+    private static final double targetDistance = Units.feetToMeters(1.0);
 
-    private final PIDController forwardPID = new PIDController(3.0, 0.0, 0.0);
-    private final PIDController strafePID  = new PIDController(3.0, 0.0, 0.0);
+    private final PIDController forwardPID = new PIDController(1.0, 0.0, 0.0);
+    private final PIDController strafePID  = new PIDController(1.0, 0.0, 0.0);
     private final PIDController turnPID    = new PIDController(0.050, 0.0, 0.001);
 
     public visionAlignment(driveKay drive) {
@@ -90,12 +90,12 @@ public void execute() {
     double turnErrorDeg = tx;
 
     double vx = forwardPID.calculate(distanceMeters, targetDistance);
-    double vy = strafePID.calculate(lateralErrorMeters, 0.0);
+    double vy = strafePID.calculate(lateralErrorMeters, 0);
     double omega = turnPID.calculate(tx, 0.0);
 
-    vx = MathUtil.clamp(vx, -2.0, 2.0);
-    vy = MathUtil.clamp(vy, -2.0, 2.0);
-    omega = MathUtil.clamp(omega, -1.5, 1.5);
+    vx = MathUtil.clamp(vx, -0.8, 0.8);
+    vy = MathUtil.clamp(vy, -0.8, 0.8);
+    omega = MathUtil.clamp(omega, -0.5, 0.5);
 
     if (forwardPID.atSetpoint()) vx = 0.0;
     if (strafePID.atSetpoint()) vy = 0.0;
