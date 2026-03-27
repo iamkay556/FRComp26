@@ -28,7 +28,9 @@ public class intakeGsun extends SubsystemBase {
     private static final double SLOW_MOVE_POWER = 0.1;
 
     private static final double STALL_CHECK_SECONDS = 0.5;
-    private static final double STALL_MIN_DELTA_ROT = 0.05;
+    private static final double STALL_MIN_DELTA_ROT = 0.025;
+
+    private static final double TIMEOUT_SECONDS = 1.5;
 
     private static final double kP = 1.5;
     private static final double kI = 0.0;
@@ -76,7 +78,6 @@ public class intakeGsun extends SubsystemBase {
         intakeShaft.getConfigurator().apply(cfg);
     }
 
-    // ─── SHUFFLEBOARD ─────────────────────────────────────────────────────────
     private void publishTuningData() {
         double pos   = intakeShaft.getPosition().getValueAsDouble();
         double vel   = intakeShaft.getVelocity().getValueAsDouble();
@@ -113,7 +114,6 @@ public class intakeGsun extends SubsystemBase {
         );
     }
 
-    // ─── NUDGE ────────────────────────────────────────────────────────────────
     public Command nudgeIntake() {
         return Commands.startEnd(
             () -> intakeShaft.setControl(intakePower.withOutput(NUDGE_POWER)),
@@ -124,20 +124,40 @@ public class intakeGsun extends SubsystemBase {
 
     public Command runTempKrak() {
         return Commands.startEnd(
-            () -> intakeShaft.setControl(intakePower.withOutput(-0.15)),
-            () -> intakeShaft.setControl(intakePower.withOutput(0)),
-            this
-        );
-    }
-    public Command runTempKrakBackwards() {
-        return Commands.startEnd(
-            () -> intakeShaft.setControl(intakePower.withOutput(0.15)),
+            () -> intakeShaft.setControl(intakePower.withOutput(-0.1)),
             () -> intakeShaft.setControl(intakePower.withOutput(0)),
             this
         );
     }
 
-    private Command shaftMoveWithStall(double power) {
+    public Command runTempKrakBackwards() {
+        return Commands.startEnd(
+            () -> intakeShaft.setControl(intakePower.withOutput(0.1)),
+            () -> intakeShaft.setControl(intakePower.withOutput(0)),
+            this
+        );
+    }
+
+    public Command shaftSlowSpin(boolean forward) {
+        double power = forward ? SLOW_MOVE_POWER : -SLOW_MOVE_POWER;
+        return Commands.startEnd(
+            () -> intakeShaft.setControl(intakePower.withOutput(power)),
+            () -> intakeShaft.setControl(intakePower.withOutput(0.0)),
+            this
+        );
+    }
+
+    public Command shaftSpinTimeout(boolean forward) {
+        double power = forward ? SLOW_MOVE_POWER : -SLOW_MOVE_POWER;
+        return Commands.startEnd(
+            () -> intakeShaft.setControl(intakePower.withOutput(power)),
+            () -> intakeShaft.setControl(intakePower.withOutput(0.0)),
+            this
+        ).withTimeout(TIMEOUT_SECONDS);
+    }
+
+    public Command shaftSpinUntilStall(boolean forward) {
+        double power = forward ? SLOW_MOVE_POWER : -SLOW_MOVE_POWER;
         return Commands.sequence(
             Commands.runOnce(() -> {
                 stallTimer.reset();
@@ -146,14 +166,12 @@ public class intakeGsun extends SubsystemBase {
                 stallTimerRunning  = true;
                 SmartDashboard.putBoolean("intakeShaft/Stalled", false);
             }),
-
             Commands.run(() -> {
                 intakeShaft.setControl(intakePower.withOutput(power));
 
                 if (stallTimerRunning && stallTimer.hasElapsed(STALL_CHECK_SECONDS)) {
                     double currentPos = intakeShaft.getPosition().getValueAsDouble();
                     double delta      = Math.abs(currentPos - stallCheckStartPos);
-
                     SmartDashboard.putNumber("intakeShaft/Stall Delta (rot)", delta);
 
                     if (delta < STALL_MIN_DELTA_ROT) {
@@ -166,20 +184,11 @@ public class intakeGsun extends SubsystemBase {
                 }
             }, this)
             .until(() -> !stallTimerRunning)
-
         ).finallyDo((interrupted) -> {
             intakeShaft.setControl(intakePower.withOutput(0.0));
             stallTimer.stop();
             stallTimerRunning = false;
         });
-    }
-
-    public Command shaftForwardUntilStall() {
-        return shaftMoveWithStall(SLOW_MOVE_POWER);
-    }
-
-    public Command shaftBackwardUntilStall() {
-        return shaftMoveWithStall(-SLOW_MOVE_POWER);
     }
 
 
