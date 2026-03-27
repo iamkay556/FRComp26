@@ -32,8 +32,8 @@ public class shooterRichard extends SubsystemBase {
     public void periodic() {}
 
     public void shooterStart() {
-        shooter1.setControl(shooterPower.withOutput(-1.0));
-        shooter2.setControl(shooterPower.withOutput(-1.0));
+        shooter1.setControl(shooterPower.withOutput(1));
+        shooter2.setControl(shooterPower.withOutput(-1));
         inmotor.setControl(intakePower.withOutput(0.4));
     }
 

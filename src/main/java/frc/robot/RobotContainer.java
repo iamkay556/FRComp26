@@ -5,6 +5,7 @@
 package frc.robot;
 
 import frc.robot.commands.visionAlignment;
+import frc.robot.commands.visionAlignmentNew;
 import frc.robot.commands.appTag;
 
 import frc.robot.subsystems.driveKay;
@@ -82,8 +83,11 @@ public class RobotContainer {
     m_driverController.button(8).whileTrue(m_intake.holdPosition2());
     m_driverController.button(9).whileTrue(m_intake.runIntake());
     // m_driverController.button(10).whileTrue(m_VisionAlignment);
-     m_driverController.button(10).whileTrue(new visionAlignment(m_swerve)); 
-    m_driverController.button(11).whileTrue(m_approachReef);
+    //  m_driverController.button(10).whileTrue(new visionAlignment(m_swerve)); 
+     m_driverController.button(10).whileTrue(new visionAlignmentNew(m_swerve));
+     m_driverController.button(11).whileTrue(m_visionShooter.runShooter());
+     m_driverController.button(12).whileTrue(m_shooter.runShooter());
+    // m_driverController.button(11).whileTrue(m_approachReef);
 
     
 

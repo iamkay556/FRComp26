@@ -31,9 +31,9 @@ public class visionShooter extends SubsystemBase {
     private final PIDController powerPID = new PIDController(1.0, 0.0, 0.0);
 
     public visionShooter() {
-        this.shooter1 = new TalonFX(0);
-        this.shooter2 = new TalonFX(0);
-        this.inmotor = new TalonFX(0);
+        this.shooter1 = new TalonFX(22);
+        this.shooter2 = new TalonFX(25);
+        this.inmotor = new TalonFX(24);
         powerPID.setTolerance(0.1);
     }
 
@@ -47,17 +47,20 @@ public class visionShooter extends SubsystemBase {
     public double[] getTargetDistance() {
         double[] robotPoseTargetSpace = LimelightHelpers.getTargetPose_RobotSpace(limelightName);
         double x = robotPoseTargetSpace[0];
-        double y = robotPoseTargetSpace[1];
+        double y = robotPoseTargetSpace[1]; 
         double z = robotPoseTargetSpace[2];
-        double horizontalDistance = Math.sqrt(Math.pow(x, 2) + Math.pow(z, 2));
-        double verticalDistance = y;
+        double horizontalDistance = Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
+        double verticalDistance = z;
         double[] distances = {horizontalDistance, verticalDistance};
         return distances;
     }
 
     public double calculateShooterPower(double[] distances, double angle) {
+        if ((distances[0] * Math.tan(angle) - distances[1]) <= 0) {
+            return 0;
+        }
         double targetVelocity = Math.sqrt((9.8 * Math.pow(distances[0], 2)) / ((2 * Math.pow(Math.cos(angle), 2)) * (distances[0] * Math.tan(angle) - distances[1])));
-        double wheelRadius = 0.1524;
+        double wheelRadius = 0.0762;
         double gearRatio = 1;
         double tune = 1.0;
         double targetWheelVelocity = (((targetVelocity / wheelRadius) * tune) / (2 * Math.PI)) * gearRatio;
@@ -118,6 +121,8 @@ public class visionShooter extends SubsystemBase {
                 double power = calculateShooterPower(distances, angle);
                 // double power = calculateShooterPowerTrialandError(distances);
                 shooterStart(power);
+
+                 SmartDashboard.putNumber("VisionShooter/Power", power);
             },
             this
         );
