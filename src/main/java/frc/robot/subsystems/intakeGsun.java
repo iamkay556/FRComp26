@@ -11,51 +11,45 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 
 
-
-
 public class intakeGsun extends SubsystemBase {
 
-    // ─── POSITIONS ────────────────────────────────────────────────────────────
-    // Position 1: confirmed correct angle from Phoenix Tuner X self-test
-    private static final double HOLD_POSITION_ROTATIONS1 = 0.16;
+    private static final double HOLD_POSITION_ROTATIONS1 = 0.4512;
+    private static final double HOLD_POSITION_ROTATIONS2 = -3.343;
 
-    // Position 2: tune this — move to desired angle, read "intakeShaft/Position"
-    // from Shuffleboard, paste here
-    private static final double HOLD_POSITION_ROTATIONS2 = 6.8; // TUNE THIS
+    private static final double NUDGE_POWER           = 0.2;
+    private static final double NUDGE_TIMEOUT_SECONDS = 0.5;
 
-    // 120 degrees in rotor rotations (120 / 360 = 0.333 rotations).
-    // If your mechanism has a gear ratio, multiply: e.g. 0.333 * gearRatio
-    private static final double NUDGE_ROTATIONS = 0.333;
+    private static final double SLOW_MOVE_POWER = 0.1;
 
-    // How fast the nudge spins (duty cycle, 0.0 to 1.0). Keep small.
-    private static final double NUDGE_POWER = 0.2;
+    private static final double STALL_CHECK_SECONDS = 0.5;
+    private static final double STALL_MIN_DELTA_ROT = 0.05;
 
-    // How long (seconds) the nudge runs before stopping automatically.
-    private static final double NUDGE_TIMEOUT_SECONDS = 0.5; // TUNE THIS
-
-    // ─── PID + MOTION MAGIC ───────────────────────────────────────────────────
-    private static final double kP = 10.0;
+    private static final double kP = 1.5;
     private static final double kI = 0.0;
     private static final double kD = 0.0;
     private static final double kV = 0.12;
     private static final double kA = 0.0;
-    private static final double kS = 0.2;
+    private static final double kS = 0.1;
 
-    private static final double MM_CRUISE_VELOCITY = 50.0;
-    private static final double MM_ACCELERATION    = 80.0;
-    private static final double MM_JERK            = 40.0;
-    // ─────────────────────────────────────────────────────────────────────────
+    private static final double MM_CRUISE_VELOCITY = 10.0;
+    private static final double MM_ACCELERATION    = 20.0;
+    private static final double MM_JERK            = 1.0;
 
     private TalonFX intakeBall;
     private TalonFX intakeShaft;
 
-    final DutyCycleOut intakePower   = new DutyCycleOut(0.0);
+    final DutyCycleOut intakePower           = new DutyCycleOut(0.0);
     final MotionMagicVoltage positionRequest = new MotionMagicVoltage(0).withSlot(0);
+
+    private final Timer stallTimer    = new Timer();
+    private double stallCheckStartPos = 0.0;
+    private boolean stallTimerRunning = false;
 
     public intakeGsun() {
         this.intakeBall  = new TalonFX(19);
@@ -66,9 +60,6 @@ public class intakeGsun extends SubsystemBase {
     private void configureMotor() {
         TalonFXConfiguration cfg = new TalonFXConfiguration();
 
-        MotorOutputConfigs motor = cfg.MotorOutput;
-        motor.NeutralMode = NeutralModeValue.Brake;
-
         Slot0Configs slot0 = cfg.Slot0;
         slot0.kP = kP;
         slot0.kI = kI;
@@ -76,7 +67,7 @@ public class intakeGsun extends SubsystemBase {
         slot0.kV = kV;
         slot0.kA = kA;
         slot0.kS = kS;
-        
+
         MotionMagicConfigs mm = cfg.MotionMagic;
         mm.MotionMagicCruiseVelocity = MM_CRUISE_VELOCITY;
         mm.MotionMagicAcceleration   = MM_ACCELERATION;
@@ -85,22 +76,16 @@ public class intakeGsun extends SubsystemBase {
         intakeShaft.getConfigurator().apply(cfg);
     }
 
-    // ─── SHUFFLEBOARD TUNING ─────────────────────────────────────────────────
-    // Call this from periodic() to stream live motor data to Shuffleboard.
-    // Open Shuffleboard, look for the "intakeShaft" tab.
-    // Move the mechanism to any position and read "intakeShaft/Position (rot)"
-    // to find the right value for HOLD_POSITION_ROTATIONS1/2.
+    // ─── SHUFFLEBOARD ─────────────────────────────────────────────────────────
     private void publishTuningData() {
-        double pos = intakeShaft.getPosition().getValueAsDouble();
-        double vel = intakeShaft.getVelocity().getValueAsDouble();
+        double pos   = intakeShaft.getPosition().getValueAsDouble();
+        double vel   = intakeShaft.getVelocity().getValueAsDouble();
         double volts = intakeShaft.getMotorVoltage().getValueAsDouble();
 
         SmartDashboard.putNumber("intakeShaft/Position (rot)", pos);
         SmartDashboard.putNumber("intakeShaft/Position (deg)", pos * 360.0);
         SmartDashboard.putNumber("intakeShaft/Velocity (rot-s)", vel);
         SmartDashboard.putNumber("intakeShaft/Voltage (V)", volts);
-
-        // Shows how far off the shaft is from each target position
         SmartDashboard.putNumber("intakeShaft/Error to Pos1 (rot)", pos - HOLD_POSITION_ROTATIONS1);
         SmartDashboard.putNumber("intakeShaft/Error to Pos2 (rot)", pos - HOLD_POSITION_ROTATIONS2);
     }
@@ -128,10 +113,7 @@ public class intakeGsun extends SubsystemBase {
         );
     }
 
-    // ─── NUDGE: spins ~120 degrees then stops automatically ──────────────────
-    // Use this as a backup if Motion Magic isn't working or you need a quick jog.
-    // NUDGE_TIMEOUT_SECONDS controls how long it runs — tune it so it stops
-    // roughly at 120 degrees. Watch "intakeShaft/Position (deg)" on Shuffleboard.
+    // ─── NUDGE ────────────────────────────────────────────────────────────────
     public Command nudgeIntake() {
         return Commands.startEnd(
             () -> intakeShaft.setControl(intakePower.withOutput(NUDGE_POWER)),
@@ -140,23 +122,59 @@ public class intakeGsun extends SubsystemBase {
         ).withTimeout(NUDGE_TIMEOUT_SECONDS);
     }
 
-    public Command runTempKrak(){ {
+    public Command runTempKrak() {
         return Commands.startEnd(
-            () -> intakeShaft.setControl(intakePower.withOutput(-0.2)), 
+            () -> intakeShaft.setControl(intakePower.withOutput(-0.5)),
             () -> intakeShaft.setControl(intakePower.withOutput(0)),
             this
         );
-    }}
+    }
 
-     public Command runTempKrakBackwards(){ {
-        return Commands.startEnd(
-            () -> intakeShaft.setControl(intakePower.withOutput(0.2)), 
-            () -> intakeShaft.setControl(intakePower.withOutput(0)),
-            this
-        );
-    }}
+    private Command shaftMoveWithStall(double power) {
+        return Commands.sequence(
+            Commands.runOnce(() -> {
+                stallTimer.reset();
+                stallTimer.start();
+                stallCheckStartPos = intakeShaft.getPosition().getValueAsDouble();
+                stallTimerRunning  = true;
+                SmartDashboard.putBoolean("intakeShaft/Stalled", false);
+            }),
 
-    // ─── HOLD POSITIONS ───────────────────────────────────────────────────────
+            Commands.run(() -> {
+                intakeShaft.setControl(intakePower.withOutput(power));
+
+                if (stallTimerRunning && stallTimer.hasElapsed(STALL_CHECK_SECONDS)) {
+                    double currentPos = intakeShaft.getPosition().getValueAsDouble();
+                    double delta      = Math.abs(currentPos - stallCheckStartPos);
+
+                    SmartDashboard.putNumber("intakeShaft/Stall Delta (rot)", delta);
+
+                    if (delta < STALL_MIN_DELTA_ROT) {
+                        SmartDashboard.putBoolean("intakeShaft/Stalled", true);
+                        stallTimerRunning = false;
+                    } else {
+                        stallCheckStartPos = currentPos;
+                        stallTimer.reset();
+                    }
+                }
+            }, this)
+            .until(() -> !stallTimerRunning)
+
+        ).finallyDo((interrupted) -> {
+            intakeShaft.setControl(intakePower.withOutput(0.0));
+            stallTimer.stop();
+            stallTimerRunning = false;
+        });
+    }
+
+    public Command shaftForwardUntilStall() {
+        return shaftMoveWithStall(SLOW_MOVE_POWER);
+    }
+
+    public Command shaftBackwardUntilStall() {
+        return shaftMoveWithStall(-SLOW_MOVE_POWER);
+    }
+
 
     public Command holdPosition1() {
         return Commands.run(
