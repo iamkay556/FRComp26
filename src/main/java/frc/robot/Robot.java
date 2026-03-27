@@ -50,6 +50,7 @@ public class Robot extends TimedRobot {
       0.0,  // pitch degrees
       0.0    // yaw degrees
   );
+
    SmartDashboard.putData("Autonomous Options", m_chooser);
    m_chooser.addOption(leaveAuto, leaveAuto);
   }

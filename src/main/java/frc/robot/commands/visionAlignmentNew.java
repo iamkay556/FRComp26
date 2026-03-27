@@ -12,7 +12,7 @@ import frc.robot.subsystems.driveKay;
 public class visionAlignmentNew extends Command {
     private final driveKay drive;
     private final String limelightName = "limelight";
-    private static final double targetDistance = Units.feetToMeters(4.0);
+    private static final double targetDistance = Units.feetToMeters(5.0);
 
     private final PIDController forwardPID = new PIDController(1.0, 0.0, 0.0);
     private final PIDController strafePID  = new PIDController(1.0, 0.0, 0.0);
@@ -22,9 +22,9 @@ public class visionAlignmentNew extends Command {
         this.drive = drive;
         addRequirements(drive);
 
-        forwardPID.setTolerance(0.1);
-        strafePID.setTolerance(0.1);
-        turnPID.setTolerance(3.0);
+        forwardPID.setTolerance(0.05);
+        strafePID.setTolerance(0.05);
+        turnPID.setTolerance(2.0);
     }
 private int telemetryCounter = 0;
 private boolean lastHadTarget = false;
@@ -90,15 +90,15 @@ public void execute() {
     double turnErrorDeg = tx;
 
     double vx = forwardPID.calculate(distanceMeters, targetDistance);
-    double vy = strafePID.calculate(lateralErrorMeters, 0.0);
+    double vy = strafePID.calculate(lateralErrorMeters, -0.3);
     double omega = turnPID.calculate(tx, 0.0);
 
-    vx = MathUtil.clamp(vx, -0.8, 0.8);
-    vy = MathUtil.clamp(vy, -0.8, 0.8);
+    vx = MathUtil.clamp(vx, -1, 1);
+    vy = MathUtil.clamp(vy, -1, 1);
     omega = MathUtil.clamp(omega, -0.5, 0.5);
 
     if (forwardPID.atSetpoint()) vx = 0.0;
-    if (strafePID.atSetpoint()) vy = 0.0;
+    if (strafePID.atSetpoint()) vy = -.3;
     if (turnPID.atSetpoint()) omega = 0.0;
 
     drive.driveRobotRelative(new ChassisSpeeds(-vx, vy, -omega));
@@ -128,9 +128,9 @@ public boolean isFinished() {
     double lateralError  = Math.abs(robotPoseTargetSpace[0]);
     double turnError     = Math.abs(LimelightHelpers.getTX(limelightName));
 
-    return distanceError < 0.10
-        && lateralError  < 0.10
-        && turnError     < 5.0;
+    return distanceError < 0.05
+        && lateralError  < 0.05
+        && turnError     < 2.0;
 }
 
 // public boolean isFinished() {

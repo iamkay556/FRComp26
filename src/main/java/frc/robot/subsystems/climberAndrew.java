@@ -4,6 +4,7 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -57,6 +58,8 @@ public class climberAndrew extends SubsystemBase {
 
     private final TalonFX climber = new TalonFX(26); // CHANGE CAN ID
     private final MotionMagicVoltage positionRequest = new MotionMagicVoltage(0).withSlot(0);
+    final DutyCycleOut climberPow= new DutyCycleOut(0.0);
+
 
     public climberAndrew() {
         configureMotor();
@@ -83,9 +86,7 @@ public class climberAndrew extends SubsystemBase {
 
     public void periodic() {}
 
-    // ─── 3 CORE ACTIONS ──────────────────────────────────────────────────────
 
-    // 1. Lower climber arm to hook position
     private Command lowerClimber() {
         return Commands.run(
             () -> climber.setControl(positionRequest.withPosition(LOWER_POSITION_ROTATIONS)),
@@ -93,7 +94,6 @@ public class climberAndrew extends SubsystemBase {
         );
     }
 
-    // 2. Drive robot backward using driveKay.driveRobotRelative
     private Command driveBack(driveKay drive) {
         return Commands.run(
             () -> drive.driveRobotRelative(new ChassisSpeeds(-DRIVE_BACK_SPEED_MPS, 0, 0)),
@@ -106,15 +106,12 @@ public class climberAndrew extends SubsystemBase {
         ));
     }
 
-    // 3. Retract climber to pull robot up
     private Command pullUp() {
         return Commands.run(
             () -> climber.setControl(positionRequest.withPosition(CLIMB_POSITION_ROTATIONS)),
             this
         );
     }
-
-    // ─── INDIVIDUAL COMMANDS (bind to buttons for manual control) ─────────────
 
     public Command cmdLowerClimber() {
         return lowerClimber();
@@ -124,10 +121,22 @@ public class climberAndrew extends SubsystemBase {
         return pullUp();
     }
 
-    // ─── FULL AUTO CLIMB SEQUENCE ─────────────────────────────────────────────
-    // Step 1: Lower arm → wait until within tolerance of lower position
-    // Step 2: Drive backward to seat robot against cage
-    // Step 3: Retract climber and hold — keeps pulling until command cancelled
+    public Command climbFor() {
+        return Commands.startEnd(
+            () -> climber.setControl(climberPow.withOutput(-0.7)),
+            () -> climber.setControl(climberPow.withOutput(0)),
+            this
+        );
+    }
+    public Command climbBack() {
+        return Commands.startEnd(
+            () -> climber.setControl(climberPow.withOutput(0.7)),
+            () -> climber.setControl(climberPow.withOutput(0)),
+            this
+        );
+    }
+
+
     public Command fullClimb(driveKay drive) {
         return lowerClimber()
             .until(() -> Math.abs(
