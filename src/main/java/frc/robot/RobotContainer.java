@@ -27,8 +27,8 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 
 public class RobotContainer {
 
-  private static final double SHOOT_DURATION_SECONDS  = 2.0; 
-  private static final double DRIVE_BACK_SPEED_MPS    = 0.5;
+  private static final double SHOOT_DURATION_SECONDS  = 6.0; 
+  private static final double DRIVE_BACK_SPEED_MPS    = 1.0;
   private static final double DRIVE_BACK_DURATION_SEC = 1.5;
 
   private final CommandJoystick m_driverController = new CommandJoystick(0);
@@ -111,20 +111,34 @@ public class RobotContainer {
     // m_xbox.rightBumper().whileTrue(m_visionShooter.runShooter());
   }
 
+  // public Command getAutonomousCommand() {
+  //   return m_shooter.runShooterTot()
+  //       .withTimeout(SHOOT_DURATION_SECONDS)
+  //       .andThen(Commands.runOnce(m_shooter::shooterStopTot, m_shooter))
+  //       .andThen(
+  //           Commands.run(
+  //               () -> m_swerve.driveRobotRelative(new ChassisSpeeds(-DRIVE_BACK_SPEED_MPS, 0, 0)),
+  //               m_swerve
+  //           ).withTimeout(DRIVE_BACK_DURATION_SEC)
+  //       )
+  //       .andThen(Commands.runOnce(
+  //           () -> m_swerve.driveRobotRelative(new ChassisSpeeds(0, 0, 0)),
+  //           m_swerve
+  //       ));
+  // }
+
   public Command getAutonomousCommand() {
-    return m_shooter.runShooterTot()
-        .withTimeout(SHOOT_DURATION_SECONDS)
-        .andThen(Commands.runOnce(m_shooter::shooterStopTot, m_shooter))
-        .andThen(
-            Commands.run(
-                () -> m_swerve.driveRobotRelative(new ChassisSpeeds(-DRIVE_BACK_SPEED_MPS, 0, 0)),
-                m_swerve
-            ).withTimeout(DRIVE_BACK_DURATION_SEC)
-        )
-        .andThen(Commands.runOnce(
-            () -> m_swerve.driveRobotRelative(new ChassisSpeeds(0, 0, 0)),
-            m_swerve
-        ));
+      return Commands.run(
+              () -> m_swerve.driveRobotRelative(new ChassisSpeeds(-DRIVE_BACK_SPEED_MPS, 0, 0)),
+              m_swerve
+          ).withTimeout(DRIVE_BACK_DURATION_SEC)
+          .andThen(Commands.runOnce(
+              () -> m_swerve.driveRobotRelative(new ChassisSpeeds(0, 0, 0)),
+              m_swerve
+          ))
+          .andThen(m_visionShooter.runShooter()
+              .withTimeout(SHOOT_DURATION_SECONDS)
+          );
   }
 
   // public Command getAutonomousCommand() {
