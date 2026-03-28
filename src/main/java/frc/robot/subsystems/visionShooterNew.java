@@ -13,16 +13,16 @@ public class visionShooterNew extends SubsystemBase {
 
 
     private static final double[][] POWER_TABLE = {
-        {  50.0, 0.52  },
-        {  63.0, 0.55  },
-        {  75.0, 0.575 },
+        {  50.0, 0.525  },
+        {  63.0, 0.56  },
+        {  75.0, 0.58 },
         { 120.0, 0.67  },
     };
 
     private static final double MIN_POWER = 0.50;
     private static final double MAX_POWER = 0.75;
 
-    private static final double FEED_POWER = 0.55;
+    private static final double FEED_POWER = 0.6;
 
     private static final String LIMELIGHT = "limelight";
 
@@ -38,7 +38,7 @@ public class visionShooterNew extends SubsystemBase {
 
     @Override
     public void periodic() {
-        double distIn = getDistanceInches();
+        double distIn = getDistance();
         SmartDashboard.putNumber("visionShooter/Distance (in)", distIn);
         SmartDashboard.putNumber("visionShooter/Calculated Power", interpolatePower(distIn));
         SmartDashboard.putBoolean("visionShooter/Has Target", LimelightHelpers.getTV(LIMELIGHT));
@@ -46,15 +46,15 @@ public class visionShooterNew extends SubsystemBase {
 
     // DISTANCE 
     // pose[2] (Z = forward distance)
-    private double getDistanceMeters() {
+    private double getDistance() {
         double[] pose = LimelightHelpers.getTargetPose_RobotSpace(LIMELIGHT);
         if (pose == null || pose.length < 6) return 0.0;
-        return pose[2];
+        return pose[2] * 39.3702 ;
     }
 
-    private double getDistanceInches() {
-        return getDistanceMeters() * 39.3701;
-    }
+    // private double getDistanceInches() {
+    //     return getDistanceMeters() * 39.3701;
+    // }
 
     private double interpolatePower(double distInches) {
         if (distInches <= POWER_TABLE[0][0]) return POWER_TABLE[0][1];
@@ -91,7 +91,7 @@ public class visionShooterNew extends SubsystemBase {
                 SmartDashboard.putString("visionShooter/Status", "No target");
                 return;
             }
-            double distIn = getDistanceInches();
+            double distIn = getDistance();
             double power  = interpolatePower(distIn);
             shooterStart(power);
             SmartDashboard.putString("visionShooter/Status", "Shooting");

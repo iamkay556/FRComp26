@@ -71,19 +71,19 @@ public class visionShooter extends SubsystemBase {
     }
 
     public double calculateShooterPowerTrialandError(double[] distances) {
-        double power = 1;
-        if (distances[0] < 0.5) {
-            power = 0.3;
-        } else if (distances[0] < 1) {
-            power = 0.4;
-        } else if (distances[0] < 1.5) {
-            power = 0.5;
-        } else if (distances[0] < 2) {
+        double power = 0.55;
+        if (distances[0] < 1) {
+            power = 0.51;
+        } else if (distances[0] < 1.27) {
+            power = 0.53;
+        } else if (distances[0] < 1.6) {
+            power = 0.55;
+        } else if (distances[0] < 1.905) {
+            power = 0.56;
+        } else if (distances[0] < 2.54) {
             power = 0.6;
-        } else if (distances[0] < 2.5) {
-            power = 0.7;
-        } else if (distances[0] < 3) {
-            power = 0.8;
+        } else if (distances[0] < 3.048) {
+            power = 0.67;
         }
         return power;
     }

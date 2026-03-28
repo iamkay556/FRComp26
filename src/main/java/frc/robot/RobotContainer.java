@@ -88,8 +88,9 @@ public class RobotContainer {
 
     // Intake
     m_aimJoystick.button(4).whileTrue(m_intake.runIntake());
-    m_aimJoystick.button(5).whileTrue(m_intake.runTempKrak());
-    m_aimJoystick.button(6).whileTrue(m_intake.runTempKrakBackwards());
+    m_aimJoystick.button(5).whileTrue(m_visionShooter.runShooter());
+    // m_aimJoystick.button(5).whileTrue(m_intake.runTempKrak());
+    // m_aimJoystick.button(6).whileTrue(m_intake.runTempKrakBackwards());
     // m_aimJoystick.button(7).onTrue(m_intake.shaftForwardUntilStall());
     // m_aimJoystick.button(8).onTrue(m_intake.shaftBackwardUntilStall());
     // m_aimJoystick.button(9).whileTrue(m_intake.holdPosition1());
