@@ -86,6 +86,21 @@ public class climberAndrew extends SubsystemBase {
 
     public void periodic() {}
 
+     public Command runDown() {
+        return Commands.startEnd(
+            () -> climber.setControl(climberPow.withOutput(-0.1)),
+            () -> climber.setControl(climberPow.withOutput(0)),
+            this
+        );
+    }
+
+    public Command runUp() {
+        return Commands.startEnd(
+            () -> climber.setControl(climberPow.withOutput(0.1)),
+            () -> climber.setControl(climberPow.withOutput(0)),
+            this
+        );
+    }
 
     private Command lowerClimber() {
         return Commands.run(

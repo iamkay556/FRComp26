@@ -43,8 +43,8 @@ public class shooterRichard extends SubsystemBase {
         // inmotor.setControl(intakePower.withOutput(0.0));
     }
     public void shooterStartTot() {
-        shooter1.setControl(shooterPower.withOutput(.750));
-        shooter2.setControl(shooterPower.withOutput(-.750));
+        shooter1.setControl(shooterPower.withOutput(.67)); 
+        shooter2.setControl(shooterPower.withOutput(-.67));
         inmotor.setControl(intakePower.withOutput(0.4));
     }
 
