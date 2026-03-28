@@ -65,6 +65,60 @@ public class shooterRichard extends SubsystemBase {
     public Command stopRunShooterTot() {
         return Commands.runOnce(() -> shooterStopTot(), this);
     }
+
+
+        // 50 inches
+    public Command runShooter50in() {
+        return Commands.startEnd(
+            () -> {
+                shooter1.setControl(shooterPower.withOutput(0.52));
+                shooter2.setControl(shooterPower.withOutput(-0.52));
+                inmotor.setControl(intakePower.withOutput(0.4));
+            },
+            () -> shooterStopTot(),
+            this
+        );
+    }
+    
+    // 63 inches
+    public Command runShooter63in() {
+        return Commands.startEnd(
+            () -> {
+                shooter1.setControl(shooterPower.withOutput(0.55));
+                shooter2.setControl(shooterPower.withOutput(-0.55));
+                inmotor.setControl(intakePower.withOutput(0.4));
+            },
+            () -> shooterStopTot(),
+            this
+        );
+    }
+    
+    // 75 inches
+    public Command runShooter75in() {
+        return Commands.startEnd(
+            () -> {
+                shooter1.setControl(shooterPower.withOutput(0.575));
+                shooter2.setControl(shooterPower.withOutput(-0.575));
+                inmotor.setControl(intakePower.withOutput(0.4));
+            },
+            () -> shooterStopTot(),
+            this
+        );
+    }
+    
+    // 120 inches
+    public Command runShooter120in() {
+        return Commands.startEnd(
+            () -> {
+                shooter1.setControl(shooterPower.withOutput(0.67));
+                shooter2.setControl(shooterPower.withOutput(-0.67));
+                inmotor.setControl(intakePower.withOutput(0.4));
+            },
+            () -> shooterStopTot(),
+            this
+        );
+    }
+
     public Command runShooterOrange() {
     return Commands.startEnd(
         () -> shooterStart(),
