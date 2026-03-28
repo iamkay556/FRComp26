@@ -27,8 +27,8 @@ public class intakeGsun extends SubsystemBase {
 
     private static final double SLOW_MOVE_POWER = 0.1;
 
-    private static final double STALL_CHECK_SECONDS = 0.5;
-    private static final double STALL_MIN_DELTA_ROT = 0.025;
+    private static final double STALL_CHECK_SECONDS = 0.25;
+    private static final double STALL_MIN_DELTA_ROT = 0.01;
 
     private static final double TIMEOUT_SECONDS = 1.5;
 
@@ -148,7 +148,7 @@ public class intakeGsun extends SubsystemBase {
     }
 
     public Command shaftSpinTimeout(boolean forward) {
-        double power = forward ? SLOW_MOVE_POWER : -SLOW_MOVE_POWER;
+        double power = forward ? 0.05 : -0.05;
         return Commands.startEnd(
             () -> intakeShaft.setControl(intakePower.withOutput(power)),
             () -> intakeShaft.setControl(intakePower.withOutput(0.0)),

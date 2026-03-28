@@ -32,22 +32,53 @@ public class shooterRichard extends SubsystemBase {
     public void periodic() {}
 
     public void shooterStart() {
-        shooter1.setControl(shooterPower.withOutput(1));
-        shooter2.setControl(shooterPower.withOutput(-1));
-        inmotor.setControl(intakePower.withOutput(0.4));
+        shooter1.setControl(shooterPower.withOutput(.40));
+        shooter2.setControl(shooterPower.withOutput(-.40));
+        // inmotor.setControl(intakePower.withOutput(0.4));
     }
 
      public void shooterStop() {
         shooter1.setControl(shooterPower.withOutput(0.0));
         shooter2.setControl(shooterPower.withOutput(0.0));
+        // inmotor.setControl(intakePower.withOutput(0.0));
+    }
+    public void shooterStartTot() {
+        shooter1.setControl(shooterPower.withOutput(.750));
+        shooter2.setControl(shooterPower.withOutput(-.750));
+        inmotor.setControl(intakePower.withOutput(0.4));
+    }
+
+     public void shooterStopTot() {
+        shooter1.setControl(shooterPower.withOutput(0.0));
+        shooter2.setControl(shooterPower.withOutput(0.0));
         inmotor.setControl(intakePower.withOutput(0.0));
     }
 
-    public Command runShooter() {
+    public Command runShooterTot() {
+    return Commands.startEnd(
+        () -> shooterStartTot(),
+        () -> shooterStopTot(),
+        this
+    );
+    }
+
+    public Command stopRunShooterTot() {
+        return Commands.runOnce(() -> shooterStopTot(), this);
+    }
+    public Command runShooterOrange() {
     return Commands.startEnd(
         () -> shooterStart(),
         () -> shooterStop(),
         this
     );
-}
+    }
+
+    public Command runShooterGreen() {
+    return Commands.startEnd(
+        () -> inmotor.setControl(intakePower.withOutput(.4)),
+        () -> inmotor.setControl(intakePower.withOutput(0.0)),
+        this
+    );
+    }
+
 }

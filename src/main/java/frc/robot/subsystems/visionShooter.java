@@ -66,7 +66,7 @@ public class visionShooter extends SubsystemBase {
         double targetWheelVelocity = (((targetVelocity / wheelRadius) * tune) / (2 * Math.PI)) * gearRatio;
         double currentVelocity = shooter1.getVelocity().getValueAsDouble();
         double power = powerPID.calculate(currentVelocity, targetWheelVelocity);
-        power = MathUtil.clamp(power, -1.0, 1.0);
+        power = MathUtil.clamp(power, -0.7, 0.7);
         return power;
     }
 
@@ -101,7 +101,7 @@ public class visionShooter extends SubsystemBase {
     }
 
     public Command runShooter() {
-        return Commands.run(
+        return Commands.startEnd(
             () -> {
                 boolean tv = LimelightHelpers.getTV(limelightName);
                 if (!tv) {
@@ -124,7 +124,7 @@ public class visionShooter extends SubsystemBase {
 
                  SmartDashboard.putNumber("VisionShooter/Power", power);
             },
-            this
+            () -> shooterStop()
         );
     }
 }

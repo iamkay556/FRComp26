@@ -5,7 +5,6 @@
 package frc.robot;
 
 import frc.robot.commands.visionAlignment;
-import frc.robot.commands.visionAlignmentNew;
 import frc.robot.commands.appTag;
 
 import frc.robot.subsystems.driveKay;
@@ -73,25 +72,20 @@ public class RobotContainer {
     //     )
     // );
 
-    
-
     m_driverController.button(3).onTrue(m_swerve.zeroGyroCommand());
     m_driverController.button(4).whileTrue(m_intake.runTempKrak());
-    m_driverController.button(5).whileTrue(m_intake.runTempKrakBackwards());
+    // m_driverController.button(5).whileTrue(m_intake.runTempKrakBackwards());
     // m_driverController.button(5).whileTrue(m_shooter.runShooter());
-    m_driverController.button(7).onTrue(m_climber.climbBack());
-    m_driverController.button(8).whileTrue(m_climber.climbFor());
-    // m_driverController.button(7).onTrue(m_intake.shaftBackwardUntilStall());
-    // m_driverController.button(8).whileTrue(m_intake.shaftForwardUntilStall());
-    // m_driverController.button(7).whileTrue(m_intake.holdPosition1());
-    // m_driverController.button(8).whileTrue(m_intake.holdPosition2());
-    m_driverController.button(9).whileTrue(m_intake.runIntake());
+    m_driverController.button(7).whileTrue(m_intake.shaftSlowSpin(true));
+    m_driverController.button(8).whileTrue(m_intake.shaftSlowSpin(false));
+    m_driverController.button(9).toggleOnTrue(m_shooter.runShooterTot());
+    m_driverController.button(9).toggleOnFalse(m_shooter.stopRunShooterTot());
+    // m_driverController.button(9).onTrue(m_shooter.runShooterOrange());
+    // m_driverController.button(10).onTrue(m_shooter.runShooterGreen());
     // m_driverController.button(10).whileTrue(m_VisionAlignment);
-    //  m_driverController.button(10).whileTrue(new visionAlignment(m_swerve)); 
-     m_driverController.button(10).whileTrue(new visionAlignmentNew(m_swerve));
-     m_driverController.button(11).whileTrue(m_visionShooter.runShooter());
-     m_driverController.button(12).whileTrue(m_shooter.runShooter());
-    // m_driverController.button(11).whileTrue(m_approachReef);
+     m_driverController.button(10).whileTrue(new visionAlignment(m_swerve)); 
+    m_driverController.button(11).whileTrue(m_visionShooter.runShooter());
+    m_driverController.button(12).whileTrue(m_intake.runIntake());
 
     
 
